@@ -206,6 +206,7 @@ input[type=range]{width:100%;accent-color:var(--a);margin:4px 0 14px}
   <div class="wk" id="wk" data-s="week"></div>
   <div data-s="list">
     <section class="card dlc"><div class="lbl">Download the full list (every entry with begin and finish dates)</div><div class="dl"><button id="dxl"><i data-i="dl"></i>Excel (.xlsx)</button><button id="dtx"><i data-i="dl"></i>Text (.txt)</button></div></section>
+    <section class="card dlc"><div class="lbl">Combined summary of all entries (totals by activity, by week and by day)</div><div class="dl"><button id="sxl"><i data-i="dl"></i>Excel (.xlsx)</button><button id="stx"><i data-i="dl"></i>Text (.txt)</button></div></section>
     <div class="chips" id="fl"><button data-f="all" data-l="All">All</button><button data-f="open" data-l="In progress">In progress</button><button data-f="done" data-l="Finished">Finished</button></div>
     <ul class="card log" id="all"></ul>
   </div>
@@ -404,27 +405,33 @@ $('#box').oninput=rs;$('#go').onclick=submit;
 const SR=window.SpeechRecognition||window.webkitSpeechRecognition;
 let rec=null,want=false,base='',got=false;
 const HI=!!SR&&typeof SR.install==='function'&&typeof SR.available==='function',VL=()=>navigator.language||'en-US';
-let vst=HI?(G('dls:vg')==='1'?'crashed':'idle'):'unsupported',vbusy=false;
+const vgN=()=>parseInt(G('dls:vg'))||0;
+let vst=HI?(vgN()>=3?'crashed':'idle'):'unsupported',vbusy=false;
 function vsUI(){
-  const T={idle:'Offline voice sets itself up the first time you tap the mic, or tap the button below to do it now.',crashed:'Setting up offline voice stopped this browser once, so it is switched off. Your keyboard’s mic key still works offline.',ready:'Offline voice is installed and ready on this device.',downloading:'Downloading the offline voice pack. Keep the app open until it finishes.',downloadable:'The offline voice pack isn’t installed yet.',checking:'Checking offline voice…',unavailable:'Offline voice isn’t available in this browser. Your keyboard’s mic key still works offline.',unsupported:'This browser doesn’t let web apps install an offline voice pack. Your keyboard’s mic key still works offline.'};
-  $('#vs').textContent=T[vst]||'';$('#vdl').hidden=!(vst==='idle'||vst==='downloadable');
+  const T={idle:'Offline voice downloads itself the first time you open the app with internet. Tap the button below to do it now.',crashed:'Setting up offline voice was interrupted a few times, so it paused. Tap the button below to try again. Your keyboard’s mic key still works offline.',ready:'Offline voice is installed and ready on this device.',downloading:'Downloading the offline voice pack (one time). Keep the app open until it finishes.',downloadable:'The offline voice pack isn’t installed yet. Tap the button below to download it.',checking:'Checking offline voice…',unavailable:'Offline voice isn’t available in this browser. Your keyboard’s mic key still works offline.',unsupported:'This browser doesn’t let web apps install an offline voice pack. Your keyboard’s mic key still works offline.'};
+  $('#vs').textContent=T[vst]||'';$('#vdl').hidden=!(vst==='idle'||vst==='downloadable'||vst==='crashed');
 }
 async function prepVoice(){
   if(!HI||vbusy||vst==='ready'||vst==='crashed')return;
-  if(G('dls:vg')==='1'){vst='crashed';vsUI();return}
-  vbusy=true;S('dls:vg','1');
+  vbusy=true;S('dls:vg',String(vgN()+1));
   const o={langs:[VL()],processLocally:true};
   try{
     const a=await SR.available(o);
     if(a===true||a==='available')vst='ready';
     else if(a==='downloadable'||a==='downloading'){
-      vst='downloading';vsUI();
+      vst='downloading';vsUI();toast('Downloading offline voice (one time). Keep the app open.');
       try{vst=(await SR.install(o))?'ready':'downloadable'}catch(e){vst='downloadable'}
     }else vst='unavailable';
   }catch(e){vst='unsupported'}
-  S('dls:vg','0');vbusy=false;vsUI();if(vst==='ready')say('Offline voice is ready.');
+  S('dls:vg','0');vbusy=false;vsUI();if(vst==='ready'){say('Offline voice is ready.');if(G('dls:vr')!=='1'){S('dls:vr','1');toast('Offline voice is ready on this device.')}}
 }
-$('#vdl').onclick=()=>{vst='checking';vsUI();prepVoice()};
+$('#vdl').onclick=()=>{S('dls:vg','0');vst='checking';vsUI();prepVoice()};
+function armTap(){const f=()=>{if(vst==='downloadable'||vst==='idle')prepVoice()};addEventListener('pointerdown',f,{capture:true,once:true})}
+function autoVoice(){
+  if(!HI||!localV||vst==='crashed'||vst==='ready')return;
+  const go=()=>prepVoice().then(()=>{if(vst==='downloadable'||vst==='idle')armTap()});
+  navigator.onLine?go():addEventListener('online',go,{once:true});
+}
 const kb=m=>{$('#box').focus();say(m||'Tap the microphone key on your keyboard, speak, then tap the arrow.')};
 function startMic(){
   const off=!navigator.onLine,P=!!SR&&'processLocally' in SR.prototype,loc=P&&(localV||off);
@@ -448,6 +455,7 @@ function startMic(){
 }
 $('#mic').onclick=()=>{
   if(want){want=false;rec.stop();return}
+  if(HI&&vst==='downloading'){say('Offline voice is still downloading. Keep the app open, or use your keyboard’s mic key for now.');return}
   if(HI&&vst==='idle'){
     say('Setting up offline voice…');const t0=Date.now();
     prepVoice().then(()=>{if(vst==='ready'){Date.now()-t0<2000?startMic():say('Offline voice is ready. Tap the mic to start.')}else if(vst!=='downloading')startMic()});return;
@@ -495,6 +503,59 @@ function xlsx(L){
     f('xl/worksheets/sheet1.xml',sheet)]);
 }
 /*ENDXLSX*/
+const ent=n=>n+(n===1?' entry':' entries');
+const disp=s=>{const t=s.trim().replace(/^(?:the|a|an|my|our)\s+/i,'');return t.charAt(0).toUpperCase()+t.slice(1)};
+function sumData(){
+  const A=allEntries(),tz=x=>x.e.start||x.k,mins=x=>x.e.mins||0;
+  const mk=l=>()=>({l,n:0,m:0,f:0,a:'',z:''});
+  const add=(m,k,x,init)=>{const o=m.get(k)||init(),t=tz(x);o.n++;o.m+=mins(x);if(x.e.done)o.f++;if(!o.a||t<o.a)o.a=t;if(!o.z||t>o.z)o.z=t;m.set(k,o)};
+  const act=new Map(),wk=new Map(),dy=new Map();
+  for(const x of A){const t=tz(x),[y,mo,d]=t.split('-');add(act,disp(x.e.task).toLowerCase(),x,mk(disp(x.e.task)));add(wk,key(wkStart(new Date(y,mo-1,d))),x,mk(''));add(dy,t,x,mk(''))}
+  const fin=A.filter(x=>x.e.done),days=fin.map(x=>Math.max(0,dn(x.e.done)-dn(tz(x)))),ds=A.map(tz).sort(),by=(a,b)=>a[0]<b[0]?-1:1;
+  return{A,n:A.length,tot:A.reduce((a,x)=>a+mins(x),0),fin:fin.length,first:ds[0],last:ds[ds.length-1],nd:dy.size,
+    avg:days.length?Math.round(days.reduce((a,b)=>a+b,0)/days.length*10)/10:null,
+    act:[...act.values()].sort((a,b)=>b.m-a.m||b.n-a.n),wk:[...wk.entries()].sort(by),dy:[...dy.entries()].sort(by)};
+}
+function sumText(S){
+  const tm=m=>m?fmt(m):'no time set';
+  const L=['DAY LOG – COMBINED SUMMARY','Exported: '+stamp(),'Covers: '+fl(S.first)+' to '+fl(S.last)+' ('+S.nd+(S.nd===1?' day':' days')+' with entries)','','OVERALL',
+    'Entries: '+S.n+'  |  Finished: '+S.fin+'  |  In progress: '+(S.n-S.fin),'Total time: '+fmt(S.tot)+'  |  Average per entry: '+fmt(S.tot/S.n),
+    ...(S.avg==null?[]:['Average time to finish: '+S.avg+(S.avg===1?' day':' days')]),'','BY ACTIVITY (most time first)'];
+  S.act.forEach((o,i)=>L.push((i+1)+'. '+o.l+' - '+ent(o.n)+' - '+tm(o.m)+' - '+o.f+' finished, '+(o.n-o.f)+' in progress'));
+  L.push('','BY WEEK (weeks start on Monday)');
+  for(const[k,o]of S.wk)L.push('Week of '+fl(k)+': '+ent(o.n)+' - '+tm(o.m)+' - '+o.f+' finished');
+  L.push('','BY DAY (date the entry began)');
+  for(const[k,o]of S.dy)L.push(fl(k)+': '+ent(o.n)+' - '+tm(o.m)+' - '+o.f+' finished');
+  return L.join('\n')+'\n';
+}
+function xlsxSum(S){
+  const enc=new TextEncoder(),xe=s=>String(s).replace(/[\u0000-\u0008\u000B\u000C\u000E-\u001F]/g,'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;'),col=i=>String.fromCharCode(65+i);
+  const cell=(r,i,v,h)=>{const a=col(i)+r;if(h)return`<c r="${a}" s="1" t="inlineStr"><is><t>${xe(v)}</t></is></c>`;if(v&&v.d)return`<c r="${a}" s="2"><v>${dn(v.d)+25569}</v></c>`;if(typeof v==='number')return`<c r="${a}"><v>${v}</v></c>`;return`<c r="${a}" t="inlineStr"><is><t xml:space="preserve">${xe(v)}</t></is></c>`};
+  const D=v=>({d:v}),tm=m=>m?fmt(m):'';
+  const T=[
+    {name:'Overview',H:['Item','Value'],W:[28,26],R:[['Exported',stamp()],['First begin date',D(S.first)],['Last begin date',D(S.last)],['Days with entries',S.nd],['Entries',S.n],['Finished',S.fin],['In progress',S.n-S.fin],['Total time (min)',S.tot],['Total time',fmt(S.tot)],['Average per entry (min)',Math.round(S.tot/S.n)],['Average days to finish',S.avg==null?'':S.avg]]},
+    {name:'By activity',H:['Activity','Entries','Time spent (min)','Time spent','Finished','In progress','First began','Last began'],W:[40,10,16,14,10,12,14,14],R:S.act.map(o=>[o.l,o.n,o.m,tm(o.m),o.f,o.n-o.f,D(o.a),D(o.z)])},
+    {name:'By week',H:['Week starting (Mon)','Entries','Time spent (min)','Time spent','Finished','In progress'],W:[20,10,16,14,10,12],R:S.wk.map(([k,o])=>[D(k),o.n,o.m,tm(o.m),o.f,o.n-o.f])},
+    {name:'By day',H:['Date','Entries','Time spent (min)','Time spent','Finished','In progress'],W:[16,10,16,14,10,12],R:S.dy.map(([k,o])=>[D(k),o.n,o.m,tm(o.m),o.f,o.n-o.f])}];
+  const M='http://schemas.openxmlformats.org/spreadsheetml/2006/main',R='http://schemas.openxmlformats.org/officeDocument/2006/relationships',PK='http://schemas.openxmlformats.org/package/2006/relationships',X='<?xml version="1.0" encoding="UTF-8" standalone="yes"?>',f=(n,t)=>({n,d:enc.encode(X+t)});
+  const ct=a=>`application/vnd.openxmlformats-officedocument.spreadsheetml.${a}+xml`;
+  const sh=T.map(t=>{const n=t.R.length+1,rows=['<row r="1">'+t.H.map((h,i)=>cell(1,i,h,1)).join('')+'</row>',...t.R.map((r,j)=>`<row r="${j+2}">`+r.map((v,i)=>v===''||v==null?'':cell(j+2,i,v)).join('')+'</row>')];
+    return`<worksheet xmlns="${M}"><dimension ref="A1:${col(t.H.length-1)}${n}"/><sheetViews><sheetView workbookViewId="0"><pane ySplit="1" topLeftCell="A2" activePane="bottomLeft" state="frozen"/><selection pane="bottomLeft"/></sheetView></sheetViews><sheetFormatPr defaultRowHeight="15"/><cols>${t.W.map((w,i)=>`<col min="${i+1}" max="${i+1}" width="${w}" customWidth="1"/>`).join('')}</cols><sheetData>${rows.join('')}</sheetData></worksheet>`});
+  return zip([
+    f('[Content_Types].xml',`<Types xmlns="http://schemas.openxmlformats.org/package/2006/content-types"><Default Extension="rels" ContentType="application/vnd.openxmlformats-package.relationships+xml"/><Default Extension="xml" ContentType="application/xml"/><Override PartName="/xl/workbook.xml" ContentType="${ct('sheet.main')}"/>${T.map((_,i)=>`<Override PartName="/xl/worksheets/sheet${i+1}.xml" ContentType="${ct('worksheet')}"/>`).join('')}<Override PartName="/xl/styles.xml" ContentType="${ct('styles')}"/></Types>`),
+    f('_rels/.rels',`<Relationships xmlns="${PK}"><Relationship Id="rId1" Type="${R}/officeDocument" Target="xl/workbook.xml"/></Relationships>`),
+    f('xl/workbook.xml',`<workbook xmlns="${M}" xmlns:r="${R}"><sheets>${T.map((t,i)=>`<sheet name="${t.name}" sheetId="${i+1}" r:id="rId${i+1}"/>`).join('')}</sheets></workbook>`),
+    f('xl/_rels/workbook.xml.rels',`<Relationships xmlns="${PK}">${T.map((_,i)=>`<Relationship Id="rId${i+1}" Type="${R}/worksheet" Target="worksheets/sheet${i+1}.xml"/>`).join('')}<Relationship Id="rId${T.length+1}" Type="${R}/styles" Target="styles.xml"/></Relationships>`),
+    f('xl/styles.xml',`<styleSheet xmlns="${M}"><numFmts count="1"><numFmt numFmtId="164" formatCode="dd mmm yyyy"/></numFmts><fonts count="2"><font><sz val="11"/><name val="Calibri"/></font><font><b/><sz val="11"/><color rgb="FFFFFFFF"/><name val="Calibri"/></font></fonts><fills count="3"><fill><patternFill patternType="none"/></fill><fill><patternFill patternType="gray125"/></fill><fill><patternFill patternType="solid"><fgColor rgb="FF1E7B4B"/><bgColor indexed="64"/></patternFill></fill></fills><borders count="1"><border><left/><right/><top/><bottom/><diagonal/></border></borders><cellStyleXfs count="1"><xf numFmtId="0" fontId="0" fillId="0" borderId="0"/></cellStyleXfs><cellXfs count="4"><xf numFmtId="0" fontId="0" fillId="0" borderId="0" xfId="0"/><xf numFmtId="0" fontId="1" fillId="2" borderId="0" xfId="0" applyFont="1" applyFill="1"/><xf numFmtId="164" fontId="0" fillId="0" borderId="0" xfId="0" applyNumberFormat="1" applyAlignment="1"><alignment horizontal="left"/></xf><xf numFmtId="0" fontId="0" fillId="0" borderId="0" xfId="0" applyAlignment="1"><alignment vertical="top" wrapText="1"/></xf></cellXfs><cellStyles count="1"><cellStyle name="Normal" xfId="0" builtinId="0"/></cellStyles></styleSheet>`),
+    ...sh.map((x,i)=>f('xl/worksheets/sheet'+(i+1)+'.xml',x))]);
+}
+function dlCombined(kind){
+  const S=sumData();if(!S.n)return toast('No entries to summarise yet.');
+  const d=key(new Date());
+  if(kind==='xlsx')return save('day-log-combined-summary-'+d+'.xlsx',xlsxSum(S));
+  save('day-log-combined-summary-'+d+'.txt',new Blob([sumText(S)],{type:'text/plain;charset=utf-8'}));
+}
+
 function save(name,blob){
   const f=new File([blob],name,{type:blob.type}),ios=/iP(hone|ad|od)/.test(navigator.userAgent)||(navigator.platform==='MacIntel'&&navigator.maxTouchPoints>1);
   if(ios&&navigator.standalone&&navigator.canShare&&navigator.canShare({files:[f]})){navigator.share({files:[f]}).catch(()=>{});return}
@@ -517,7 +578,7 @@ document.querySelectorAll('.tabs button').forEach(b=>b.onclick=()=>{mode=b.datas
 $('#prev').onclick=()=>{day.setDate(day.getDate()-(mode==='day'?1:7));load(true)};
 $('#next').onclick=()=>{day.setDate(day.getDate()+(mode==='day'?1:7));load(true)};
 document.querySelectorAll('#fl button').forEach(b=>b.onclick=()=>{flt=b.dataset.f;render(true)});
-$('#dxl').onclick=()=>dlList('xlsx');$('#dtx').onclick=()=>dlList('txt');
+$('#dxl').onclick=()=>dlList('xlsx');$('#dtx').onclick=()=>dlList('txt');$('#sxl').onclick=()=>dlCombined('xlsx');$('#stx').onclick=()=>dlCombined('txt');
 const phv=()=>{try{const p=JSON.parse(G('dls:ph'));return p&&isFinite(p.h)&&isFinite(p.s)?p:null}catch(e){return null}};
 function syncAp(){
   const t0=G('dls:t'),p=phv(),t=t0==='brown'?'brown':t0==='photo'&&p?'photo':'green',m=G('dls:m')==='dark'?'dark':'light';
@@ -564,14 +625,14 @@ $('#sD').oninput=()=>{S('dls:bgd',$('#sD').value/100);$('#oD').textContent=$('#s
 document.querySelectorAll('#fit button').forEach(b=>b.onclick=()=>{S('dls:bgf',b.dataset.f);applyTheme();syncAp()});
 $('#rmp').onclick=()=>{if(!confirm('Remove the photo background?'))return;try{localStorage.removeItem('dls:bg');localStorage.removeItem('dls:ph');localStorage.removeItem('dls:bgf')}catch(e){}setTheme('green')};
 $('#lv').checked=localV;$('#vo').checked=voiceOn;
-$('#lv').onchange=()=>{localV=$('#lv').checked;S('dls:lv',localV?'1':'0')};
+$('#lv').onchange=()=>{localV=$('#lv').checked;S('dls:lv',localV?'1':'0');if(localV)autoVoice()};
 $('#vo').onchange=()=>{voiceOn=$('#vo').checked;S('dls:vo',voiceOn?'1':'0')};
 $('#wipe').onclick=()=>{if(!confirm('Erase every entry saved on this phone? This can’t be undone.'))return;dayKeys().forEach(k=>{try{localStorage.removeItem('daylog:'+k)}catch(e){}});load();say('All entries erased.')};
 syncAp();
 load();
 $('#off').textContent='Offline mode isn’t active yet. Open the app once with internet.';
 try{if(navigator.storage&&navigator.storage.persist)navigator.storage.persist()}catch(e){}
-vsUI();
+vsUI();autoVoice();
 try{if('serviceWorker' in navigator){navigator.serviceWorker.register('sw.js').catch(()=>{});navigator.serviceWorker.ready.then(()=>{$('#off').textContent='App works offline. Voice offline needs a browser with on-device speech; otherwise use your keyboard’s mic key.'})}}catch(e){}
 </script>
 </body>
