@@ -230,6 +230,7 @@ input[type=range]{width:100%;accent-color:var(--a);margin:4px 0 14px}
       <label class="opt"><input type="checkbox" id="lv"><span>Keep voice on this device. Private, and works offline where your browser supports it.</span></label>
       <label class="opt"><input type="checkbox" id="vo"><span>If on-device voice isn’t available, allow online voice (Apple or Google may process the audio)</span></label>
       <p class="lbl" id="off"></p>
+      <p class="lbl" id="vs"></p><button class="mini" id="vdl" hidden><i data-i="dl"></i>Download offline voice now</button>
     </section>
     <h2>Privacy</h2>
     <section class="card priv">
@@ -402,9 +403,30 @@ $('#box').oninput=rs;$('#go').onclick=submit;
 // voice: continuous, on-device when supported
 const SR=window.SpeechRecognition||window.webkitSpeechRecognition;
 let rec=null,want=false,base='',got=false;
+const HI=!!SR&&typeof SR.install==='function'&&typeof SR.available==='function',VL=()=>navigator.language||'en-US';
+let vst=HI?(G('dls:vg')==='1'?'crashed':'idle'):'unsupported',vbusy=false;
+function vsUI(){
+  const T={idle:'Offline voice sets itself up the first time you tap the mic, or tap the button below to do it now.',crashed:'Setting up offline voice stopped this browser once, so it is switched off. Your keyboard’s mic key still works offline.',ready:'Offline voice is installed and ready on this device.',downloading:'Downloading the offline voice pack. Keep the app open until it finishes.',downloadable:'The offline voice pack isn’t installed yet.',checking:'Checking offline voice…',unavailable:'Offline voice isn’t available in this browser. Your keyboard’s mic key still works offline.',unsupported:'This browser doesn’t let web apps install an offline voice pack. Your keyboard’s mic key still works offline.'};
+  $('#vs').textContent=T[vst]||'';$('#vdl').hidden=!(vst==='idle'||vst==='downloadable');
+}
+async function prepVoice(){
+  if(!HI||vbusy||vst==='ready'||vst==='crashed')return;
+  if(G('dls:vg')==='1'){vst='crashed';vsUI();return}
+  vbusy=true;S('dls:vg','1');
+  const o={langs:[VL()],processLocally:true};
+  try{
+    const a=await SR.available(o);
+    if(a===true||a==='available')vst='ready';
+    else if(a==='downloadable'||a==='downloading'){
+      vst='downloading';vsUI();
+      try{vst=(await SR.install(o))?'ready':'downloadable'}catch(e){vst='downloadable'}
+    }else vst='unavailable';
+  }catch(e){vst='unsupported'}
+  S('dls:vg','0');vbusy=false;vsUI();if(vst==='ready')say('Offline voice is ready.');
+}
+$('#vdl').onclick=()=>{vst='checking';vsUI();prepVoice()};
 const kb=m=>{$('#box').focus();say(m||'Tap the microphone key on your keyboard, speak, then tap the arrow.')};
-$('#mic').onclick=()=>{
-  if(want){want=false;rec.stop();return}
+function startMic(){
   const off=!navigator.onLine,P=!!SR&&'processLocally' in SR.prototype,loc=P&&(localV||off);
   if(!SR||(!loc&&(off||!voiceOn)))return kb(off?'You’re offline. Use your keyboard’s mic key (works offline if Dictation is on).':0);
   rec=new SR();rec.lang=navigator.language||'en-US';rec.interimResults=true;rec.continuous=true;
@@ -415,6 +437,7 @@ $('#mic').onclick=()=>{
   rec.onerror=e=>{
     const f=['not-allowed','service-not-allowed','language-not-supported'].includes(e.error);if(f)want=false;
     if(e.error==='no-speech'||e.error==='aborted')return;
+    if(e.error==='language-not-supported'&&HI&&vst!=='unavailable'){vst='checking';vsUI();prepVoice();say('Getting the offline voice pack… try again in a moment.');return}
     say(e.error==='language-not-supported'?'On-device speech isn’t installed for your language. Use your keyboard’s mic key.':f?'Mic is blocked. Use your keyboard’s mic in the box instead.':'Voice problem: '+e.error);
   };
   rec.onend=()=>{
@@ -422,6 +445,14 @@ $('#mic').onclick=()=>{
     $('#mic').classList.remove('on');if(got)submit();
   };
   try{rec.start()}catch(e){want=false;say('Couldn’t start the mic.')}
+}
+$('#mic').onclick=()=>{
+  if(want){want=false;rec.stop();return}
+  if(HI&&vst==='idle'){
+    say('Setting up offline voice…');const t0=Date.now();
+    prepVoice().then(()=>{if(vst==='ready'){Date.now()-t0<2000?startMic():say('Offline voice is ready. Tap the mic to start.')}else if(vst!=='downloading')startMic()});return;
+  }
+  startMic();
 };
 
 // export
@@ -540,6 +571,7 @@ syncAp();
 load();
 $('#off').textContent='Offline mode isn’t active yet. Open the app once with internet.';
 try{if(navigator.storage&&navigator.storage.persist)navigator.storage.persist()}catch(e){}
+vsUI();
 try{if('serviceWorker' in navigator){navigator.serviceWorker.register('sw.js').catch(()=>{});navigator.serviceWorker.ready.then(()=>{$('#off').textContent='App works offline. Voice offline needs a browser with on-device speech; otherwise use your keyboard’s mic key.'})}}catch(e){}
 </script>
 </body>
