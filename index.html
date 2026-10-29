@@ -12,6 +12,7 @@
 <meta name="apple-mobile-web-app-status-bar-style" content="default">
 <link rel="manifest" href="manifest.webmanifest">
 <link rel="apple-touch-icon" href="icon-180.png">
+<link rel="icon" type="image/png" href="icon-192.png">
 <title>Day Log</title>
 <script>
 var TH={h:152,s:72,dk:false};
@@ -25,7 +26,21 @@ function applyTheme(){
  st=document.documentElement.style;for(var k in v)st.setProperty('--'+k,v[k]);
  var c=hsl2rgb(h,s,dk?52:30).map(function(x){x/=255;return x<=.03928?x/12.92:Math.pow((x+.055)/1.055,2.4)}),L=.2126*c[0]+.7152*c[1]+.0722*c[2];
  st.setProperty('--on',L<.179?'#ffffff':'#0b0b0b');st.colorScheme=dk?'dark':'light';
- var m=document.querySelector('meta[name=theme-color]');if(m)m.content='#'+hsl2rgb(h,dk?s*.4:Math.min(s,70),dk?8:90).map(function(x){return('0'+x.toString(16)).slice(-2)}).join('');
+ var m=document.querySelector('meta[name=theme-color]');if(m)m.content='#'+hsl2rgb(h,dk?s*.4:Math.min(s,70),dk?8:90).map(function(x){return('0'+x.toString(16)).slice(-2)}) .join('');
+ applyBg(t,dk);
+}
+function applyBg(t,dk){
+ var R=document.documentElement,st=R.style,ls=function(k){try{return localStorage.getItem(k)}catch(e){return null}},d=t==='photo'?ls('dls:bg'):null;
+ if(!d){R.classList.remove('ph','pd','pl');R.__d=null;['--bgi','--bgc','--bgo','--bgb','--bgs'].forEach(function(k){st.removeProperty(k)});return}
+ var p={};try{p=JSON.parse(ls('dls:ph'))||{}}catch(e){}
+ var o=parseFloat(ls('dls:bgo')),dm=parseFloat(ls('dls:bgd')),c=/^#[0-9a-f]{6}$/i.test(p.c||'')?p.c:'#333333';
+ o=isFinite(o)?Math.min(1,Math.max(.1,o)):1;dm=isFinite(dm)?Math.min(.8,Math.max(0,dm)):.25;
+ var y=(parseInt(c.substr(1,2),16)*.299+parseInt(c.substr(3,2),16)*.587+parseInt(c.substr(5,2),16)*.114)/255*(1-dm);
+ if(R.__d!==d){st.setProperty('--bgi','url("'+d+'")');R.__d=d}
+ st.setProperty('--bgc',c);st.setProperty('--bgo',o);st.setProperty('--bgb',1-dm);st.setProperty('--bgs',ls('dls:bgf')==='fit'?'contain':'cover');
+ st.setProperty('--gl',dk?'rgba(16,16,16,.58)':'rgba(255,255,255,.72)');st.setProperty('--glb',dk?'rgba(255,255,255,.18)':'rgba(255,255,255,.85)');
+ R.classList.add('ph');R.classList.toggle('pd',y<.5);R.classList.toggle('pl',y>=.5);
+ var m=document.querySelector('meta[name=theme-color]');if(m)m.content=c;
 }
 applyTheme();
 </script>
@@ -162,9 +177,17 @@ dialog::backdrop{background:rgba(5,15,10,.35);-webkit-backdrop-filter:blur(6px);
 @keyframes breathe{50%{transform:scale(1.05)}}
 @keyframes drift{from{transform:translate3d(-3%,-2%,0) scale(1)}to{transform:translate3d(3%,3%,0) scale(1.08)}}
 body.anim .tile path,.fx .tile path,.fx .chk.on path{stroke-dasharray:1;animation:draw .8s ease both}
+#bgp{display:none;position:fixed;inset:0;z-index:-1;pointer-events:none;background:var(--bgc,#333);filter:brightness(var(--bgb,1))}
+html.ph #bgp{display:block}html.ph body::before{display:none}
+#bgp i{position:absolute;inset:0;background:var(--bgi) center/var(--bgs,cover) no-repeat;opacity:var(--bgo,1);transition:opacity .2s}
+html.pd :is(h1,.sub,h2,.nav){color:#fff;text-shadow:0 1px 10px rgba(0,0,0,.5)}
+html.pl :is(h1,.sub,h2,.nav){color:#0b1b14;text-shadow:0 1px 10px rgba(255,255,255,.6)}
+input[type=range]{width:100%;accent-color:var(--a);margin:4px 0 14px}
+#pc{margin-top:16px}#pc b{float:right;color:var(--ink);font-weight:600}
 </style>
 </head>
 <body>
+<div id="bgp" aria-hidden="true"><i></i></div>
 <main>
   <div class="top" data-s="day week">
     <button class="nav" id="prev" aria-label="Previous"><svg viewBox="0 0 12 20" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"><path d="M10 2 2 10l8 8"/></svg></button>
@@ -193,8 +216,14 @@ body.anim .tile path,.fx .tile path,.fx .chk.on path{stroke-dasharray:1;animatio
       <div class="seg2" id="md"><button data-m="light"><i data-i="sun"></i><span>Light</span></button><button data-m="dark"><i data-i="moon"></i><span>Dark</span></button></div>
       <div class="lbl" style="margin-bottom:6px">Colour</div>
       <div class="th" id="th"><button data-t="green" style="--c:#17913D">Green</button><button data-t="brown" style="--c:#8A5A2B">Brown</button><button data-t="photo" id="phb" style="--c:#999">Photo</button></div>
-      <button class="mini" id="pick"><i data-i="img"></i>Choose a photo for colours</button>
-      <p class="lbl" style="margin:10px 0 0">Pick any picture from your phone. The app takes its main colour and builds the theme from it. The photo itself is never saved or sent anywhere.</p>
+      <button class="mini" id="pick"><i data-i="img"></i>Choose a photo for the background</button>
+      <p class="lbl" style="margin:10px 0 0">Pick a picture from your phone to use as the background. It is shrunk and kept only on this phone, never sent anywhere. Buttons and any empty area take their colour from the photo.</p>
+      <div id="pc" hidden>
+        <div class="lbl">Photo transparency <b id="oO"></b></div><input type="range" id="sO" min="10" max="100" step="1" aria-label="Photo transparency">
+        <div class="lbl">Photo darkness <b id="oD"></b></div><input type="range" id="sD" min="0" max="80" step="1" aria-label="Photo darkness">
+        <div class="seg2" id="fit"><button data-f="fill"><i data-i="fill"></i><span>Fill screen</span></button><button data-f="fit"><i data-i="fit"></i><span>Fit whole photo</span></button></div>
+        <button class="wipe" id="rmp">Remove photo</button>
+      </div>
     </section>
     <h2>Voice</h2>
     <section class="card priv">
@@ -241,7 +270,7 @@ const G=k=>{try{return localStorage.getItem(k)}catch(e){return null}},S=(k,v)=>{
 const colorFor=s=>{let x=0;for(const c of s.toLowerCase())x=(x*31+c.charCodeAt(0))>>>0;return`hsl(${(TH.h+[-22,0,22][x%3]+360)%360},${Math.round(TH.s)}%,${TH.dk?56+(x>>3)%3*6:32+(x>>3)%3*7}%)`};
 const EM=[[/meet|call|zoom|sync/,'call'],[/mail|inbox/,'mail'],[/report|write|draft|doc/,'doc'],[/lunch|eat|coffee|break/,'cup'],[/code|debug|build|develop/,'code'],[/review|check/,'find'],[/plan|strategy|schedule/,'cal'],[/travel|drive|commute/,'car']];
 const iconFor=s=>{const m=EM.find(([r])=>r.test(s.toLowerCase()));return m?m[1]:'pen'};
-const IC={call:'M5 4h4l2 5-2.5 1.5a11 11 0 0 0 5 5L15 13l5 2v4a2 2 0 0 1-2 2A15 15 0 0 1 3 6a2 2 0 0 1 2-2z',mail:'M3 6h18v12H3zM3 7l9 7 9-7',doc:'M6 3h9l4 4v14H6zM14 3v5h5M9 13h7M9 17h5',cup:'M5 8h11v6a4 4 0 0 1-4 4H9a4 4 0 0 1-4-4zM16 9h2a2 2 0 0 1 0 4h-2M8 3v2M12 3v2',code:'M9 8l-5 4 5 4M15 8l5 4-5 4M13 5l-2 14',find:'M11 4a7 7 0 1 0 0 14 7 7 0 0 0 0-14zM16.5 16.5L21 21',cal:'M4 6h16v14H4zM4 10h16M8 3v4M16 3v4',car:'M5 16v-5l2-5h10l2 5v5zM3 16h18M7.5 13h.01M16.5 13h.01',pen:'M4 20l1-4L16 5l3 3L8 19zM14 7l3 3',sun:'M12 8a4 4 0 1 0 0 8 4 4 0 0 0 0-8zM12 2v2M12 20v2M2 12h2M20 12h2M5 5l1.5 1.5M17.5 17.5L19 19M5 19l1.5-1.5M17.5 6.5L19 5',moon:'M20 14.5A8 8 0 0 1 9.5 4 8 8 0 1 0 20 14.5z',week:'M4 5h16v15H4zM4 10h16M9 10v10M15 10v10',list:'M9 6h11M9 12h11M9 18h11M4 6h.01M4 12h.01M4 18h.01',sliders:'M4 8h9M17 8h3M4 16h3M11 16h9M15 5v6M9 13v6',dl:'M12 4v11M7 11l5 5 5-5M5 20h14',img:'M4 5h16v14H4zM4 16l5-5 4 4 3-3 4 4M9 9h.01'};
+const IC={call:'M5 4h4l2 5-2.5 1.5a11 11 0 0 0 5 5L15 13l5 2v4a2 2 0 0 1-2 2A15 15 0 0 1 3 6a2 2 0 0 1 2-2z',mail:'M3 6h18v12H3zM3 7l9 7 9-7',doc:'M6 3h9l4 4v14H6zM14 3v5h5M9 13h7M9 17h5',cup:'M5 8h11v6a4 4 0 0 1-4 4H9a4 4 0 0 1-4-4zM16 9h2a2 2 0 0 1 0 4h-2M8 3v2M12 3v2',code:'M9 8l-5 4 5 4M15 8l5 4-5 4M13 5l-2 14',find:'M11 4a7 7 0 1 0 0 14 7 7 0 0 0 0-14zM16.5 16.5L21 21',cal:'M4 6h16v14H4zM4 10h16M8 3v4M16 3v4',car:'M5 16v-5l2-5h10l2 5v5zM3 16h18M7.5 13h.01M16.5 13h.01',pen:'M4 20l1-4L16 5l3 3L8 19zM14 7l3 3',sun:'M12 8a4 4 0 1 0 0 8 4 4 0 0 0 0-8zM12 2v2M12 20v2M2 12h2M20 12h2M5 5l1.5 1.5M17.5 17.5L19 19M5 19l1.5-1.5M17.5 6.5L19 5',moon:'M20 14.5A8 8 0 0 1 9.5 4 8 8 0 1 0 20 14.5z',week:'M4 5h16v15H4zM4 10h16M9 10v10M15 10v10',list:'M9 6h11M9 12h11M9 18h11M4 6h.01M4 12h.01M4 18h.01',sliders:'M4 8h9M17 8h3M4 16h3M11 16h9M15 5v6M9 13v6',dl:'M12 4v11M7 11l5 5 5-5M5 20h14',img:'M4 5h16v14H4zM4 16l5-5 4 4 3-3 4 4M9 9h.01',fill:'M4 8V4h4M20 8V4h-4M4 16v4h4M20 16v4h-4',fit:'M8 4v4H4M16 4v4h4M8 20v-4H4M16 20v-4h4'};
 const svg=d=>'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path pathLength="1" d="'+d+'"/></svg>';
 document.querySelectorAll('[data-i]').forEach(n=>n.innerHTML=svg(IC[n.dataset.i]));
 const CHK='<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3.5" stroke-linecap="round" stroke-linejoin="round"><path pathLength="1" d="M5 12.5l4.5 4.5L19 7.5"/></svg>';
@@ -464,6 +493,12 @@ function syncAp(){
   document.querySelectorAll('#th button').forEach(b=>b.classList.toggle('on',b.dataset.t===t));
   document.querySelectorAll('#md button').forEach(b=>b.classList.toggle('on',b.dataset.m===m));
   $('#phb').style.setProperty('--c',p?'hsl('+p.h+','+p.s+'%,40%)':'#999');
+  const has=t==='photo'&&!!G('dls:bg');$('#pc').hidden=!has;
+  if(has){
+    const o=Math.round((parseFloat(G('dls:bgo'))||1)*100),dv=parseFloat(G('dls:bgd')),dm=Math.round((isFinite(dv)?dv:.25)*100);
+    $('#sO').value=o;$('#sD').value=dm;$('#oO').textContent=o+'%';$('#oD').textContent=dm+'%';
+    document.querySelectorAll('#fit button').forEach(b=>b.classList.toggle('on',b.dataset.f===(G('dls:bgf')==='fit'?'fit':'fill')));
+  }
 }
 const setTheme=t=>{S('dls:t',t);applyTheme();syncAp();render()};
 document.querySelectorAll('#th button').forEach(b=>b.onclick=()=>{b.dataset.t==='photo'&&!phv()?$('#ph').click():setTheme(b.dataset.t)});
@@ -475,17 +510,28 @@ $('#ph').onchange=e=>{
   const r=new FileReader();r.onerror=()=>toast('Couldn’t read that photo.');
   r.onload=()=>{const im=new Image();im.onerror=()=>toast('This browser can’t open that picture. Try a different one.');
     im.onload=()=>{
-      const c=document.createElement('canvas');c.width=48;c.height=Math.min(96,Math.max(1,Math.round(48*im.height/im.width)));
-      const x=c.getContext('2d');x.drawImage(im,0,0,c.width,c.height);
-      const d=x.getImageData(0,0,c.width,c.height).data,B=Array.from({length:24},()=>({w:0,x:0,y:0,s:0}));let tot=0;
-      for(let i=0;i<d.length;i+=4){if(d[i+3]<128)continue;const[h,s,l]=rgb2hsl(d[i],d[i+1],d[i+2]),w=s*(1-Math.abs(2*l-1));if(w<.02)continue;const b=B[Math.min(23,Math.floor(h/15))];b.w+=w;b.x+=w*Math.cos(h*Math.PI/180);b.y+=w*Math.sin(h*Math.PI/180);b.s+=w*s;tot+=w}
-      const best=B.reduce((a,b)=>b.w>a.w?b:a);
-      if(tot<20||best.w<=0)return toast('No strong colour found in that photo. Try a more colourful one.');
-      S('dls:ph',JSON.stringify({h:Math.round((Math.atan2(best.y,best.x)*180/Math.PI+360)%360),s:Math.round(Math.max(30,Math.min(82,best.s/best.w*100)))}));
-      setTheme('photo');toast('Photo colours applied.');
+      const c=document.createElement('canvas'),x=c.getContext('2d');c.width=48;c.height=Math.min(96,Math.max(1,Math.round(48*im.height/im.width)));x.drawImage(im,0,0,c.width,c.height);
+      const d=x.getImageData(0,0,c.width,c.height).data,B=Array.from({length:24},()=>({w:0,x:0,y:0,s:0}));let tot=0,ar=0,ag=0,ab=0,n=0;
+      for(let i=0;i<d.length;i+=4){if(d[i+3]<128)continue;ar+=d[i];ag+=d[i+1];ab+=d[i+2];n++;const[h,s,l]=rgb2hsl(d[i],d[i+1],d[i+2]),w=s*(1-Math.abs(2*l-1));if(w<.02)continue;const b=B[Math.min(23,Math.floor(h/15))];b.w+=w;b.x+=w*Math.cos(h*Math.PI/180);b.y+=w*Math.sin(h*Math.PI/180);b.s+=w*s;tot+=w}
+      if(!n)return toast('That picture is empty. Try a different one.');
+      const best=B.reduce((a,b)=>b.w>a.w?b:a),hex='#'+[ar,ag,ab].map(v=>Math.round(v/n).toString(16).padStart(2,'0')).join('');
+      const h=tot<20?TH.h:Math.round((Math.atan2(best.y,best.x)*180/Math.PI+360)%360),sat=tot<20?TH.s:Math.round(Math.max(30,Math.min(82,best.s/best.w*100)));
+      let ok=false;
+      for(const[m,q]of[[1280,.82],[1000,.7],[720,.6],[480,.55]]){
+        const k=Math.min(1,m/Math.max(im.width,im.height)),cv=document.createElement('canvas');cv.width=Math.max(1,Math.round(im.width*k));cv.height=Math.max(1,Math.round(im.height*k));
+        const cx=cv.getContext('2d');cx.fillStyle='#fff';cx.fillRect(0,0,cv.width,cv.height);cx.drawImage(im,0,0,cv.width,cv.height);
+        try{localStorage.setItem('dls:bg',cv.toDataURL('image/jpeg',q));ok=true;break}catch(e){}
+      }
+      if(!ok)return toast('Not enough space on this phone to keep the photo.');
+      S('dls:ph',JSON.stringify({h,s:sat,c:hex}));if(G('dls:bgo')==null)S('dls:bgo','1');if(G('dls:bgd')==null)S('dls:bgd','0.25');
+      setTheme('photo');toast('Photo background applied.');
     };im.src=r.result};
   r.readAsDataURL(f);
 };
+$('#sO').oninput=()=>{S('dls:bgo',$('#sO').value/100);$('#oO').textContent=$('#sO').value+'%';applyTheme()};
+$('#sD').oninput=()=>{S('dls:bgd',$('#sD').value/100);$('#oD').textContent=$('#sD').value+'%';applyTheme()};
+document.querySelectorAll('#fit button').forEach(b=>b.onclick=()=>{S('dls:bgf',b.dataset.f);applyTheme();syncAp()});
+$('#rmp').onclick=()=>{if(!confirm('Remove the photo background?'))return;try{localStorage.removeItem('dls:bg');localStorage.removeItem('dls:ph');localStorage.removeItem('dls:bgf')}catch(e){}setTheme('green')};
 $('#lv').checked=localV;$('#vo').checked=voiceOn;
 $('#lv').onchange=()=>{localV=$('#lv').checked;S('dls:lv',localV?'1':'0')};
 $('#vo').onchange=()=>{voiceOn=$('#vo').checked;S('dls:vo',voiceOn?'1':'0')};
