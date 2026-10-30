@@ -5,42 +5,23 @@
 <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'unsafe-inline'; style-src 'self' 'unsafe-inline'; img-src 'self' data:; connect-src 'none'; form-action 'none'; base-uri 'none'">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <meta name="color-scheme" content="light dark">
-<meta name="theme-color" content="#DCEBFF">
+<meta name="theme-color" content="#EDE7FF">
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="mobile-web-app-capable" content="yes">
-<meta name="apple-mobile-web-app-title" content="Day Log">
+<meta name="apple-mobile-web-app-title" content="Tracker">
 <meta name="apple-mobile-web-app-status-bar-style" content="default">
 <link rel="manifest" href="manifest.webmanifest">
 <link rel="apple-touch-icon" href="icon-180.png">
 <link rel="icon" type="image/png" href="icon-192.png">
-<title>Day Log</title>
+<title>Tracker</title>
 <script>
-var TH={h:152,s:72,dk:false};
-function hsl2rgb(h,s,l){s/=100;l/=100;var k=function(n){return(n+h/30)%12},a=s*Math.min(l,1-l),f=function(n){return l-a*Math.max(-1,Math.min(k(n)-3,Math.min(9-k(n),1)))};return[f(0),f(8),f(4)].map(function(x){return Math.round(x*255)})}
+var TH={h:252,s:80,dk:false};
 function applyTheme(){
- var ls=function(k){try{return localStorage.getItem(k)}catch(e){return null}},t=ls('dls:t'),dk=ls('dls:m')==='dark',h=152,s=72;
- if(t==='brown'){h=26;s=46}else if(t==='photo'){try{var p=JSON.parse(ls('dls:ph'));if(p&&isFinite(p.h)&&isFinite(p.s)){h=p.h;s=p.s}}catch(e){}}
- TH={h:h,s:s,dk:dk};
- var H=function(l,x){return'hsl('+h+','+Math.round(x==null?s:x)+'%,'+l+'%)'},
- v=dk?{a:H(52),a2:H(64),g1:H(20,s*.6),bg:H(8,s*.4),card:H(12,s*.35),ink:H(95,15),mute:H(70,10),sub:H(74,s*.8),inp:H(17,s*.35),red:'#FF7A6B',gl:'rgba(255,255,255,.07)',glb:'rgba(255,255,255,.16)',blo:.38}:{a:H(30),a2:H(56),g1:H(90,Math.min(s,70)),bg:H(97,Math.min(s,60)),card:'#FFFFFF',ink:H(10,40),mute:H(38,10),sub:H(25),inp:'#FFFFFF',red:'#C0392B',gl:'rgba(255,255,255,.56)',glb:'rgba(255,255,255,.8)',blo:.62},
- st=document.documentElement.style;for(var k in v)st.setProperty('--'+k,v[k]);
- var c=hsl2rgb(h,s,dk?52:30).map(function(x){x/=255;return x<=.03928?x/12.92:Math.pow((x+.055)/1.055,2.4)}),L=.2126*c[0]+.7152*c[1]+.0722*c[2];
- st.setProperty('--on',L<.179?'#ffffff':'#0b0b0b');st.colorScheme=dk?'dark':'light';
- var m=document.querySelector('meta[name=theme-color]');if(m)m.content='#'+hsl2rgb(h,dk?s*.4:Math.min(s,70),dk?8:90).map(function(x){return('0'+x.toString(16)).slice(-2)}) .join('');
- applyBg(t,dk);
-}
-function applyBg(t,dk){
- var R=document.documentElement,st=R.style,ls=function(k){try{return localStorage.getItem(k)}catch(e){return null}},d=t==='photo'?ls('dls:bg'):null;
- if(!d){R.classList.remove('ph','pd','pl');R.__d=null;['--bgi','--bgc','--bgo','--bgb','--bgs'].forEach(function(k){st.removeProperty(k)});return}
- var p={};try{p=JSON.parse(ls('dls:ph'))||{}}catch(e){}
- var o=parseFloat(ls('dls:bgo')),dm=parseFloat(ls('dls:bgd')),c=/^#[0-9a-f]{6}$/i.test(p.c||'')?p.c:'#333333';
- o=isFinite(o)?Math.min(1,Math.max(.1,o)):1;dm=isFinite(dm)?Math.min(.8,Math.max(0,dm)):.25;
- var y=(parseInt(c.substr(1,2),16)*.299+parseInt(c.substr(3,2),16)*.587+parseInt(c.substr(5,2),16)*.114)/255*(1-dm);
- if(R.__d!==d){st.setProperty('--bgi','url("'+d+'")');R.__d=d}
- st.setProperty('--bgc',c);st.setProperty('--bgo',o);st.setProperty('--bgb',1-dm);st.setProperty('--bgs',ls('dls:bgf')==='fit'?'contain':'cover');
- st.setProperty('--gl',dk?'rgba(16,16,16,.58)':'rgba(255,255,255,.72)');st.setProperty('--glb',dk?'rgba(255,255,255,.18)':'rgba(255,255,255,.85)');
- R.classList.add('ph');R.classList.toggle('pd',y<.5);R.classList.toggle('pl',y>=.5);
- var m=document.querySelector('meta[name=theme-color]');if(m)m.content=c;
+ var m=null;try{m=localStorage.getItem('dls:m')}catch(e){}
+ var dk=m?m==='dark':!!(window.matchMedia&&matchMedia('(prefers-color-scheme: dark)').matches);TH.dk=dk;
+ var v=dk?{a:'#7B5CF0',a2:'#9D84F7',g1:'#1D1833',bg:'#0F0E14',card:'#1A1823',ink:'#F4F3F8',mute:'#A9A7B5',sub:'#B8A5FA',inp:'#24212F',soft:'#2B2547',red:'#FF7A7F',gl:'#1A1823',glb:'rgba(255,255,255,.08)',on:'#FFFFFF',sh:'0 8px 24px rgba(0,0,0,.35)'}:{a:'#6C47E8',a2:'#7B5CF0',g1:'#EDE7FF',bg:'#FAFAFC',card:'#FFFFFF',ink:'#0E0E12',mute:'#6B6B76',sub:'#4B2FC9',inp:'#F5F5F8',soft:'#E9E3FF',red:'#D93A40',gl:'#FFFFFF',glb:'rgba(255,255,255,.9)',on:'#FFFFFF',sh:'0 8px 24px rgba(80,60,160,.08)'},st=document.documentElement.style;
+ for(var k in v)st.setProperty('--'+k,v[k]);st.colorScheme=dk?'dark':'light';
+ var t=document.querySelector('meta[name=theme-color]');if(t)t.content=dk?'#0F0E14':'#EDE7FF';
 }
 try{if(localStorage.getItem('dls:pin'))document.documentElement.classList.add('locked')}catch(e){}
 applyTheme();
@@ -223,11 +204,66 @@ html.locked #lk{display:flex}
 .pad button{height:72px;border-radius:50%;background:var(--gl);border:1px solid var(--glb);font-size:26px;font-weight:600;display:grid;place-items:center}
 .pad button svg{width:26px;height:26px}
 #rpi{width:100%;border-radius:12px;display:block}
+<style>
+:root{--r:22px;--font:Inter,-apple-system,BlinkMacSystemFont,"SF Pro Display","SF Pro Text",system-ui,sans-serif;--bd:color-mix(in srgb,var(--a) 14%,transparent)}
+body{font-family:var(--font);background:linear-gradient(180deg,var(--g1) 0,var(--bg) 340px) no-repeat var(--bg);padding-bottom:calc(112px + env(safe-area-inset-bottom,0px))}
+body[data-v=day]{padding-bottom:calc(340px + env(safe-area-inset-bottom,0px))}
+body::before{display:none}
+.hi{font-size:14px;color:var(--mute);margin:6px 0 4px}
+h1{font-size:26px;line-height:1.15;font-weight:700;letter-spacing:-.02em;max-width:13em}
+.sub{color:var(--mute);font-size:14px;margin:6px 0 20px}
+h2{margin:24px 4px 10px;font-size:16px;font-weight:600;color:var(--ink);text-transform:none;letter-spacing:0}
+.sh,.wk h2{display:flex;justify-content:space-between;align-items:center;margin-right:4px}
+.wk h2 span:last-child{font-size:13px;font-weight:400;color:var(--mute)}
+.lnk{font-size:13px;font-weight:500;color:var(--sub);min-height:44px;padding:0 4px;margin:-14px 0}
+.card{background:var(--card);border:0;border-radius:var(--r);box-shadow:var(--sh),inset 0 0 0 1px var(--glb);-webkit-backdrop-filter:none;backdrop-filter:none}
+.dock,.field,.chips button,dialog,#toast{-webkit-backdrop-filter:none;backdrop-filter:none}
+.sum{position:relative;padding:20px;border-radius:24px;background:linear-gradient(160deg,color-mix(in srgb,var(--soft) 40%,var(--card)),var(--soft))}
+.sum::after{content:"✦";position:absolute;top:16px;right:20px;font-size:18px;color:var(--a)}
+.total{color:var(--sub);font-size:40px;letter-spacing:-.02em}
+.seg{height:10px;border-radius:999px}
+.ring .rbg{stroke:var(--soft)}
+.log li{min-height:64px}
+.tile{width:40px;height:40px;border-radius:14px;color:var(--a);background:var(--soft);border:0;box-shadow:none}
+.chk svg{background:transparent;border:2px solid var(--a2)}
+.chk.on svg{background:var(--a);border-color:var(--a);box-shadow:none}
+.chips button{background:var(--card);border:0;box-shadow:var(--sh);min-height:44px;padding:0 16px;transition:background .15s,color .15s}
+.chips button.on{background:var(--a);color:var(--on)}
+.seg2{background:var(--inp);border:0;border-radius:999px;padding:3px}
+.seg2 button{flex-direction:row;gap:6px;height:40px;border-radius:999px;font-size:14px}
+.seg2 button.on{background:var(--a);color:var(--on);box-shadow:none}
+.seg2 button.on i{color:var(--on)}
+.seg2.tabs{position:fixed;left:0;right:0;bottom:0;z-index:30;margin:0;border-radius:0;background:var(--card);box-shadow:0 -4px 20px rgba(80,60,160,.08);padding:6px max(8px,calc(50% - 280px)) calc(6px + env(safe-area-inset-bottom,0px));gap:0}
+.seg2.tabs button{flex-direction:column;gap:2px;height:54px;border-radius:14px;font-size:11px;color:var(--mute);background:none}
+.seg2.tabs button.on{background:none;color:var(--a);font-weight:600}
+.seg2.tabs i{width:24px;height:24px;opacity:1}
+.seg2.tabs button.on i{color:var(--a)}
+.seg2.tabs button.on svg{fill:color-mix(in srgb,var(--a) 22%,transparent)}
+.dock{bottom:calc(66px + env(safe-area-inset-bottom,0px));z-index:25;background:var(--card);border:0;border-radius:24px 24px 0 0;box-shadow:0 -8px 24px rgba(80,60,160,.08);padding:12px 16px 10px}
+#mic{width:56px;height:56px;background:var(--a);color:var(--on);animation:none;box-shadow:0 6px 16px color-mix(in srgb,var(--a) 35%,transparent)}
+#mic svg{width:24px;height:24px}
+#mic.on{background:var(--a);animation:halo 1.4s infinite}
+@keyframes halo{0%{box-shadow:0 0 0 0 color-mix(in srgb,var(--a) 55%,transparent)}100%{box-shadow:0 0 0 18px transparent}}
+.field{background:var(--inp);border:0;border-radius:28px;box-shadow:none}
+#go{background:var(--a);box-shadow:none}
+.in,.bdr input{background:var(--inp);border:0;border-radius:14px;min-height:44px}
+.pri,.dl button,.bt .pri{background:var(--a);color:var(--on);border-radius:999px;box-shadow:none;min-height:44px;padding:0 20px}
+.mini{background:var(--soft);color:var(--sub);border:0;border-radius:999px;min-height:44px;padding:0 16px}
+.tgp{background:var(--soft);color:var(--sub)}
+.wipe{min-height:44px}
+dialog{background:var(--card);border:0;border-radius:24px;box-shadow:0 20px 60px rgba(14,14,18,.25)}
+dialog::backdrop{background:rgba(14,14,18,.4);-webkit-backdrop-filter:none;backdrop-filter:none}
+#toast{bottom:calc(88px + env(safe-area-inset-bottom,0px));background:var(--ink);color:var(--bg)}
+body[data-v=day] #toast{bottom:calc(292px + env(safe-area-inset-bottom,0px))}
+#lk{background:linear-gradient(180deg,var(--g1),var(--bg))}
+.pad button{background:var(--inp);border:0}
+body.anim [data-s]:not([hidden]),body.anim .log li,.fx{animation:up .3s ease-out both}
+@media (prefers-reduced-motion:reduce){#mic.on{animation:none!important}}
 </style>
 </head>
 <body>
 <div id="bgp" aria-hidden="true"><i></i></div>
-<div id="lk" role="dialog" aria-modal="true" aria-label="Day Log is locked">
+<div id="lk" role="dialog" aria-modal="true" aria-label="Tracker is locked">
   <img src="icon-192.png" alt="" width="72" height="72">
   <div class="lkt">Enter your PIN</div>
   <div class="dots" id="lkd" aria-hidden="true"></div>
@@ -241,6 +277,7 @@ html.locked #lk{display:flex}
     <button class="nav" id="next" aria-label="Next"><svg viewBox="0 0 12 20" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"><path d="M2 2l8 8-8 8"/></svg></button>
   </div>
   <div class="seg2 tabs"><button data-v="day"><i data-i="sun"></i><span>Day</span></button><button data-v="week"><i data-i="week"></i><span>Week</span></button><button data-v="list"><i data-i="list"></i><span>List</span></button><button data-v="set"><i data-i="sliders"></i><span>Settings</span></button></div>
+  <div class="hi" id="hi"></div>
   <h1 id="title"></h1>
   <div class="sub" id="date"></div>
   <section class="card sum" data-s="day week">
@@ -256,7 +293,7 @@ html.locked #lk{display:flex}
   <div data-s="day">
     <div class="card tmr" id="tmr" hidden><div class="tmi"><b id="tmn"></b><span id="tmt">00:00:00</span></div><div class="tmb"><button class="mini" id="tms">Stop</button><button class="mini" id="tmf">Finish</button><button class="mini" id="tmx" aria-label="Discard timer">Discard</button></div></div>
     <div class="card nudge" id="nudge" hidden><span>Back up your entries so a lost phone or cleared browser can’t wipe them.</span><div><button class="mini" id="nbk">Back up now</button><button class="mini" id="nlt">Later</button></div></div>
-    <h2>Activity log</h2><ul class="card log" id="log"></ul></div>
+    <h2 class="sh"><span>Activity log</span><button class="lnk" id="sa">See all</button></h2><ul class="card log" id="log"></ul></div>
   <div class="rpb" data-s="week"><button class="mini" id="rpt"><i data-i="share"></i>Weekly report (image)</button></div>
   <div class="wk" id="wk" data-s="week"></div>
   <div data-s="list">
@@ -268,11 +305,13 @@ html.locked #lk{display:flex}
     <ul class="card log" id="all"></ul>
   </div>
   <div data-s="set">
+    <h2>About you</h2>
+    <section class="card priv"><label class="fl">What should we call you?<input id="nm" class="in" maxlength="24" placeholder="Your first name" autocomplete="given-name"></label></section>
     <h2>Appearance</h2>
     <section class="card priv">
       <div class="lbl" style="margin-bottom:6px">Mode</div>
       <div class="seg2" id="md"><button data-m="light"><i data-i="sun"></i><span>Light</span></button><button data-m="dark"><i data-i="moon"></i><span>Dark</span></button></div>
-      <div class="lbl" style="margin-bottom:6px">Colour</div>
+      <div hidden><div class="lbl" style="margin-bottom:6px">Colour</div>
       <div class="th" id="th"><button data-t="green" style="--c:#17913D">Green</button><button data-t="brown" style="--c:#8A5A2B">Brown</button><button data-t="photo" id="phb" style="--c:#999">Photo</button></div>
       <button class="mini" id="pick"><i data-i="img"></i>Choose a photo for the background</button>
       <p class="lbl" style="margin:10px 0 0">Pick a picture from your phone to use as the background. It is shrunk and kept only on this phone, never sent anywhere. Buttons and any empty area take their colour from the photo.</p>
@@ -281,7 +320,7 @@ html.locked #lk{display:flex}
         <div class="lbl">Photo darkness <b id="oD"></b></div><input type="range" id="sD" min="0" max="80" step="1" aria-label="Photo darkness">
         <div class="seg2" id="fit"><button data-f="fill"><i data-i="fill"></i><span>Fill screen</span></button><button data-f="fit"><i data-i="fit"></i><span>Fit whole photo</span></button></div>
         <button class="wipe" id="rmp">Remove photo</button>
-      </div>
+      </div></div>
     </section>
     <h2>Voice</h2>
     <section class="card priv">
@@ -329,7 +368,7 @@ html.locked #lk{display:flex}
 </div></div>
 <input type="file" id="ph" accept="image/*" hidden><div id="toast" role="status"></div>
 <dialog id="wl">
-  <div class="dt" id="wlt">Welcome to Day Log</div>
+  <div class="dt" id="wlt">Welcome to Tracker</div>
   <ul class="tips">
     <li><b>Talk or type.</b> Tap the mic, or type. Say several things at once: “an hour on the report, then 30 minutes on email.”</li>
     <li><b>Tap an entry to edit it.</b> Tap its circle to mark it finished.</li>
@@ -373,9 +412,11 @@ const key=d=>d.getFullYear()+'-'+pad(d.getMonth()+1)+'-'+pad(d.getDate());
 const fmt=m=>{m=Math.round(m);const h=Math.floor(m/60),r=m%60;return h?(r?h+'h '+r+'m':h+'h'):r+'m'};
 const el=(t,c,x)=>{const e=document.createElement(t);if(c)e.className=c;if(x!=null)e.textContent=x;return e};
 const say=t=>{$('#say').textContent=t};
+const greet=()=>{const h=new Date().getHours(),n=(G('dls:nm')||'').trim();return (h<12?'Good morning':h<18?'Good afternoon':'Good evening')+(n?', '+n:'')+' 👋'};
 const fd=s=>{if(!s)return'';const[y,m,d]=s.split('-'),n=new Date(y,m-1,d);return n.toLocaleDateString(undefined,{month:'short',day:'numeric',year:+y===new Date().getFullYear()?undefined:'numeric'})};
 const G=k=>{try{return localStorage.getItem(k)}catch(e){return null}},S=(k,v)=>{try{localStorage.setItem(k,v)}catch(e){}};
-const colorFor=s=>{let x=0;for(const c of s.toLowerCase())x=(x*31+c.charCodeAt(0))>>>0;return`hsl(${(TH.h+[-22,0,22][x%3]+360)%360},${Math.round(TH.s)}%,${TH.dk?56+(x>>3)%3*6:32+(x>>3)%3*7}%)`};
+const colorFor=s=>{let x=0;for(const c of s.toLowerCase())x=(x*31+c.charCodeAt(0))>>>0;const L=TH.dk?[62,70,78,56,66]:[30,42,54,36,48];return`hsl(252,${[80,72,76][x%3]}%,${L[(x>>3)%5]}%)`};
+const colorForOld=s=>{let x=0;for(const c of s.toLowerCase())x=(x*31+c.charCodeAt(0))>>>0;return`hsl(${(TH.h+[-22,0,22][x%3]+360)%360},${Math.round(TH.s)}%,${TH.dk?56+(x>>3)%3*6:32+(x>>3)%3*7}%)`};
 const EM=[[/meet|call|zoom|sync/,'call'],[/mail|inbox/,'mail'],[/report|write|draft|doc/,'doc'],[/lunch|eat|coffee|break/,'cup'],[/code|debug|build|develop/,'code'],[/review|check/,'find'],[/plan|strategy|schedule/,'cal'],[/travel|drive|commute/,'car']];
 const iconFor=s=>{const m=EM.find(([r])=>r.test(s.toLowerCase()));return m?m[1]:'pen'};
 const IC={call:'M5 4h4l2 5-2.5 1.5a11 11 0 0 0 5 5L15 13l5 2v4a2 2 0 0 1-2 2A15 15 0 0 1 3 6a2 2 0 0 1 2-2z',mail:'M3 6h18v12H3zM3 7l9 7 9-7',doc:'M6 3h9l4 4v14H6zM14 3v5h5M9 13h7M9 17h5',cup:'M5 8h11v6a4 4 0 0 1-4 4H9a4 4 0 0 1-4-4zM16 9h2a2 2 0 0 1 0 4h-2M8 3v2M12 3v2',code:'M9 8l-5 4 5 4M15 8l5 4-5 4M13 5l-2 14',find:'M11 4a7 7 0 1 0 0 14 7 7 0 0 0 0-14zM16.5 16.5L21 21',cal:'M4 6h16v14H4zM4 10h16M8 3v4M16 3v4',car:'M5 16v-5l2-5h10l2 5v5zM3 16h18M7.5 13h.01M16.5 13h.01',pen:'M4 20l1-4L16 5l3 3L8 19zM14 7l3 3',sun:'M12 8a4 4 0 1 0 0 8 4 4 0 0 0 0-8zM12 2v2M12 20v2M2 12h2M20 12h2M5 5l1.5 1.5M17.5 17.5L19 19M5 19l1.5-1.5M17.5 6.5L19 5',moon:'M20 14.5A8 8 0 0 1 9.5 4 8 8 0 1 0 20 14.5z',week:'M4 5h16v15H4zM4 10h16M9 10v10M15 10v10',list:'M9 6h11M9 12h11M9 18h11M4 6h.01M4 12h.01M4 18h.01',sliders:'M4 8h9M17 8h3M4 16h3M11 16h9M15 5v6M9 13v6',dl:'M12 4v11M7 11l5 5 5-5M5 20h14',img:'M4 5h16v14H4zM4 16l5-5 4 4 3-3 4 4M9 9h.01',fill:'M4 8V4h4M20 8V4h-4M4 16v4h4M20 16v4h-4',fit:'M8 4v4H4M16 4v4h4M8 20v-4H4M16 20v-4h4',plus:'M12 5v14M5 12h14'};
@@ -429,13 +470,13 @@ function row(e,k,sum){
 }
 function render(a){
   if(a){document.body.classList.add('anim');clearTimeout(render.t);render.t=setTimeout(()=>document.body.classList.remove('anim'),900)}
-  document.body.dataset.v=mode;
+  document.body.dataset.v=mode;$('#hi').textContent=mode==='day'?greet():'';$('#hi').hidden=mode!=='day';
   document.querySelectorAll('[data-s]').forEach(n=>n.hidden=!n.dataset.s.split(' ').includes(mode));
   document.querySelectorAll('.tabs button').forEach(b=>b.classList.toggle('on',b.dataset.v===mode));
   const now=new Date(),short={month:'short',day:'numeric'};
   if(mode==='day'){
     const today=key(day)===key(now);
-    $('#title').textContent=today?'Today':day.toLocaleDateString(undefined,{weekday:'long'});
+    $('#title').textContent=today?'What did you get done today?':day.toLocaleDateString(undefined,{weekday:'long'});
     $('#date').textContent=day.toLocaleDateString(undefined,{month:'long',day:'numeric',year:'numeric'})+(today&&streak()>1?' · '+streak()+'-day streak':'');
     $('#next').disabled=today;summary(entries);
     const ll=$('#log');ll.replaceChildren();
@@ -647,9 +688,9 @@ function xlsx(L){
   return zip([
     f('[Content_Types].xml',`<Types xmlns="http://schemas.openxmlformats.org/package/2006/content-types"><Default Extension="rels" ContentType="application/vnd.openxmlformats-package.relationships+xml"/><Default Extension="xml" ContentType="application/xml"/><Override PartName="/xl/workbook.xml" ContentType="${ct('sheet.main')}"/><Override PartName="/xl/worksheets/sheet1.xml" ContentType="${ct('worksheet')}"/><Override PartName="/xl/styles.xml" ContentType="${ct('styles')}"/></Types>`),
     f('_rels/.rels',`<Relationships xmlns="${PK}"><Relationship Id="rId1" Type="${R}/officeDocument" Target="xl/workbook.xml"/></Relationships>`),
-    f('xl/workbook.xml',`<workbook xmlns="${M}" xmlns:r="${R}"><sheets><sheet name="Day Log" sheetId="1" r:id="rId1"/></sheets></workbook>`),
+    f('xl/workbook.xml',`<workbook xmlns="${M}" xmlns:r="${R}"><sheets><sheet name="Tracker" sheetId="1" r:id="rId1"/></sheets></workbook>`),
     f('xl/_rels/workbook.xml.rels',`<Relationships xmlns="${PK}"><Relationship Id="rId1" Type="${R}/worksheet" Target="worksheets/sheet1.xml"/><Relationship Id="rId2" Type="${R}/styles" Target="styles.xml"/></Relationships>`),
-    f('xl/styles.xml',`<styleSheet xmlns="${M}"><numFmts count="1"><numFmt numFmtId="164" formatCode="dd mmm yyyy"/></numFmts><fonts count="2"><font><sz val="11"/><name val="Calibri"/></font><font><b/><sz val="11"/><color rgb="FFFFFFFF"/><name val="Calibri"/></font></fonts><fills count="3"><fill><patternFill patternType="none"/></fill><fill><patternFill patternType="gray125"/></fill><fill><patternFill patternType="solid"><fgColor rgb="FF1E7B4B"/><bgColor indexed="64"/></patternFill></fill></fills><borders count="1"><border><left/><right/><top/><bottom/><diagonal/></border></borders><cellStyleXfs count="1"><xf numFmtId="0" fontId="0" fillId="0" borderId="0"/></cellStyleXfs><cellXfs count="4"><xf numFmtId="0" fontId="0" fillId="0" borderId="0" xfId="0"/><xf numFmtId="0" fontId="1" fillId="2" borderId="0" xfId="0" applyFont="1" applyFill="1"/><xf numFmtId="164" fontId="0" fillId="0" borderId="0" xfId="0" applyNumberFormat="1" applyAlignment="1"><alignment horizontal="left"/></xf><xf numFmtId="0" fontId="0" fillId="0" borderId="0" xfId="0" applyAlignment="1"><alignment vertical="top" wrapText="1"/></xf></cellXfs><cellStyles count="1"><cellStyle name="Normal" xfId="0" builtinId="0"/></cellStyles></styleSheet>`),
+    f('xl/styles.xml',`<styleSheet xmlns="${M}"><numFmts count="1"><numFmt numFmtId="164" formatCode="dd mmm yyyy"/></numFmts><fonts count="2"><font><sz val="11"/><name val="Calibri"/></font><font><b/><sz val="11"/><color rgb="FFFFFFFF"/><name val="Calibri"/></font></fonts><fills count="3"><fill><patternFill patternType="none"/></fill><fill><patternFill patternType="gray125"/></fill><fill><patternFill patternType="solid"><fgColor rgb="FF6C47E8"/><bgColor indexed="64"/></patternFill></fill></fills><borders count="1"><border><left/><right/><top/><bottom/><diagonal/></border></borders><cellStyleXfs count="1"><xf numFmtId="0" fontId="0" fillId="0" borderId="0"/></cellStyleXfs><cellXfs count="4"><xf numFmtId="0" fontId="0" fillId="0" borderId="0" xfId="0"/><xf numFmtId="0" fontId="1" fillId="2" borderId="0" xfId="0" applyFont="1" applyFill="1"/><xf numFmtId="164" fontId="0" fillId="0" borderId="0" xfId="0" applyNumberFormat="1" applyAlignment="1"><alignment horizontal="left"/></xf><xf numFmtId="0" fontId="0" fillId="0" borderId="0" xfId="0" applyAlignment="1"><alignment vertical="top" wrapText="1"/></xf></cellXfs><cellStyles count="1"><cellStyle name="Normal" xfId="0" builtinId="0"/></cellStyles></styleSheet>`),
     f('xl/worksheets/sheet1.xml',sheet)]);
 }
 /*ENDXLSX*/
@@ -668,7 +709,7 @@ function sumData(){
 }
 function sumText(S){
   const tm=m=>m?fmt(m):'no time set';
-  const L=['DAY LOG – COMBINED SUMMARY','Exported: '+stamp(),'Covers: '+fl(S.first)+' to '+fl(S.last)+' ('+S.nd+(S.nd===1?' day':' days')+' with entries)','','OVERALL',
+  const L=['TRACKER – COMBINED SUMMARY','Exported: '+stamp(),'Covers: '+fl(S.first)+' to '+fl(S.last)+' ('+S.nd+(S.nd===1?' day':' days')+' with entries)','','OVERALL',
     'Entries: '+S.n+'  |  Finished: '+S.fin+'  |  In progress: '+(S.n-S.fin),'Total time: '+fmt(S.tot)+'  |  Average per entry: '+fmt(S.tot/S.n),
     ...(S.avg==null?[]:['Average time to finish: '+S.avg+(S.avg===1?' day':' days')]),'','BY ACTIVITY (most time first)'];
   S.act.forEach((o,i)=>L.push((i+1)+'. '+o.l+' - '+ent(o.n)+' - '+tm(o.m)+' - '+o.f+' finished, '+(o.n-o.f)+' in progress'));
@@ -696,14 +737,14 @@ function xlsxSum(S){
     f('_rels/.rels',`<Relationships xmlns="${PK}"><Relationship Id="rId1" Type="${R}/officeDocument" Target="xl/workbook.xml"/></Relationships>`),
     f('xl/workbook.xml',`<workbook xmlns="${M}" xmlns:r="${R}"><sheets>${T.map((t,i)=>`<sheet name="${t.name}" sheetId="${i+1}" r:id="rId${i+1}"/>`).join('')}</sheets></workbook>`),
     f('xl/_rels/workbook.xml.rels',`<Relationships xmlns="${PK}">${T.map((_,i)=>`<Relationship Id="rId${i+1}" Type="${R}/worksheet" Target="worksheets/sheet${i+1}.xml"/>`).join('')}<Relationship Id="rId${T.length+1}" Type="${R}/styles" Target="styles.xml"/></Relationships>`),
-    f('xl/styles.xml',`<styleSheet xmlns="${M}"><numFmts count="1"><numFmt numFmtId="164" formatCode="dd mmm yyyy"/></numFmts><fonts count="2"><font><sz val="11"/><name val="Calibri"/></font><font><b/><sz val="11"/><color rgb="FFFFFFFF"/><name val="Calibri"/></font></fonts><fills count="3"><fill><patternFill patternType="none"/></fill><fill><patternFill patternType="gray125"/></fill><fill><patternFill patternType="solid"><fgColor rgb="FF1E7B4B"/><bgColor indexed="64"/></patternFill></fill></fills><borders count="1"><border><left/><right/><top/><bottom/><diagonal/></border></borders><cellStyleXfs count="1"><xf numFmtId="0" fontId="0" fillId="0" borderId="0"/></cellStyleXfs><cellXfs count="4"><xf numFmtId="0" fontId="0" fillId="0" borderId="0" xfId="0"/><xf numFmtId="0" fontId="1" fillId="2" borderId="0" xfId="0" applyFont="1" applyFill="1"/><xf numFmtId="164" fontId="0" fillId="0" borderId="0" xfId="0" applyNumberFormat="1" applyAlignment="1"><alignment horizontal="left"/></xf><xf numFmtId="0" fontId="0" fillId="0" borderId="0" xfId="0" applyAlignment="1"><alignment vertical="top" wrapText="1"/></xf></cellXfs><cellStyles count="1"><cellStyle name="Normal" xfId="0" builtinId="0"/></cellStyles></styleSheet>`),
+    f('xl/styles.xml',`<styleSheet xmlns="${M}"><numFmts count="1"><numFmt numFmtId="164" formatCode="dd mmm yyyy"/></numFmts><fonts count="2"><font><sz val="11"/><name val="Calibri"/></font><font><b/><sz val="11"/><color rgb="FFFFFFFF"/><name val="Calibri"/></font></fonts><fills count="3"><fill><patternFill patternType="none"/></fill><fill><patternFill patternType="gray125"/></fill><fill><patternFill patternType="solid"><fgColor rgb="FF6C47E8"/><bgColor indexed="64"/></patternFill></fill></fills><borders count="1"><border><left/><right/><top/><bottom/><diagonal/></border></borders><cellStyleXfs count="1"><xf numFmtId="0" fontId="0" fillId="0" borderId="0"/></cellStyleXfs><cellXfs count="4"><xf numFmtId="0" fontId="0" fillId="0" borderId="0" xfId="0"/><xf numFmtId="0" fontId="1" fillId="2" borderId="0" xfId="0" applyFont="1" applyFill="1"/><xf numFmtId="164" fontId="0" fillId="0" borderId="0" xfId="0" applyNumberFormat="1" applyAlignment="1"><alignment horizontal="left"/></xf><xf numFmtId="0" fontId="0" fillId="0" borderId="0" xfId="0" applyAlignment="1"><alignment vertical="top" wrapText="1"/></xf></cellXfs><cellStyles count="1"><cellStyle name="Normal" xfId="0" builtinId="0"/></cellStyles></styleSheet>`),
     ...sh.map((x,i)=>f('xl/worksheets/sheet'+(i+1)+'.xml',x))]);
 }
 function dlCombined(kind){
   const S=sumData();if(!S.n)return toast('No entries in that period yet.');
   const d=key(new Date());
-  if(kind==='xlsx')return save('day-log-combined-summary-'+($('#sp').value||'all')+'-'+d+'.xlsx',xlsxSum(S));
-  save('day-log-combined-summary-'+($('#sp').value||'all')+'-'+d+'.txt',new Blob([sumText(S)],{type:'text/plain;charset=utf-8'}));
+  if(kind==='xlsx')return save('tracker-combined-summary-'+($('#sp').value||'all')+'-'+d+'.xlsx',xlsxSum(S));
+  save('tracker-combined-summary-'+($('#sp').value||'all')+'-'+d+'.txt',new Blob([sumText(S)],{type:'text/plain;charset=utf-8'}));
 }
 
 function save(name,blob){
@@ -713,25 +754,25 @@ function save(name,blob){
 }
 function dlList(kind){
   const L=asc(),d=key(new Date());if(!L.length)return toast('No entries to download yet.');
-  if(kind==='xlsx')return save('day-log-list-'+d+'.xlsx',xlsx(L));
+  if(kind==='xlsx')return save('tracker-list-'+d+'.xlsx',xlsx(L));
   const n=L.filter(x=>x.e.done).length,tot=L.reduce((a,x)=>a+(x.e.mins||0),0);
-  const t=['DAY LOG – FULL LIST','Exported: '+stamp(),'Entries: '+L.length+'  |  Finished: '+n+'  |  In progress: '+(L.length-n)+'  |  Total time: '+fmt(tot),'','------------------------------',...L.flatMap((x,i)=>['#'+(i+1),...blk(x),''])].join('\n');
-  save('day-log-list-'+d+'.txt',new Blob([t],{type:'text/plain;charset=utf-8'}));
+  const t=['TRACKER – FULL LIST','Exported: '+stamp(),'Entries: '+L.length+'  |  Finished: '+n+'  |  In progress: '+(L.length-n)+'  |  Total time: '+fmt(tot),'','------------------------------',...L.flatMap((x,i)=>['#'+(i+1),...blk(x),''])].join('\n');
+  save('tracker-list-'+d+'.txt',new Blob([t],{type:'text/plain;charset=utf-8'}));
 }
 function dlSummary(x){
   const s=x.e.task.toLowerCase().replace(/[^a-z0-9]+/g,'-').replace(/^-+|-+$/g,'').slice(0,30)||'entry';
-  save('day-log-summary-'+s+'-'+key(new Date())+'.txt',new Blob([['DAY LOG – ENTRY SUMMARY','Exported: '+stamp(),'',...blk(x),''].join('\n')],{type:'text/plain;charset=utf-8'}));
+  save('tracker-summary-'+s+'-'+key(new Date())+'.txt',new Blob([['TRACKER – ENTRY SUMMARY','Exported: '+stamp(),'',...blk(x),''].join('\n')],{type:'text/plain;charset=utf-8'}));
 }
 
 // nav + settings
-document.querySelectorAll('.tabs button').forEach(b=>b.onclick=()=>{mode=b.dataset.v;render(true);scrollTo(0,0)});
+document.querySelectorAll('.tabs button').forEach(b=>b.onclick=()=>{mode=b.dataset.v;try{navigator.vibrate&&navigator.vibrate(8)}catch(e){}render(true);scrollTo(0,0)});
 $('#prev').onclick=()=>{day.setDate(day.getDate()-(mode==='day'?1:7));load(true)};
 $('#next').onclick=()=>{day.setDate(day.getDate()+(mode==='day'?1:7));load(true)};
 document.querySelectorAll('#fl button').forEach(b=>b.onclick=()=>{flt=b.dataset.f;render(true)});
 $('#dxl').onclick=()=>dlList('xlsx');$('#dtx').onclick=()=>dlList('txt');$('#sxl').onclick=()=>dlCombined('xlsx');$('#stx').onclick=()=>dlCombined('txt');
 const phv=()=>{try{const p=JSON.parse(G('dls:ph'));return p&&isFinite(p.h)&&isFinite(p.s)?p:null}catch(e){return null}};
 function syncAp(){
-  const t0=G('dls:t'),p=phv(),t=t0==='brown'?'brown':t0==='photo'&&p?'photo':'green',m=G('dls:m')==='dark'?'dark':'light';
+  const t='green',p=null,m=TH.dk?'dark':'light';
   document.querySelectorAll('#th button').forEach(b=>b.classList.toggle('on',b.dataset.t===t));
   document.querySelectorAll('#md button').forEach(b=>b.classList.toggle('on',b.dataset.m===m));
   $('#phb').style.setProperty('--c',p?'hsl('+p.h+','+p.s+'%,40%)':'#999');
@@ -790,7 +831,7 @@ function bkUI(n){
 }
 function backup(){
   const A=allEntries();if(!A.length)return toast('Nothing to back up yet.');
-  save('day-log-backup-'+key(new Date())+'.json',new Blob([JSON.stringify({app:'daylog',version:1,exported:new Date().toISOString(),entries:A.map(x=>({day:x.k,...x.e}))})],{type:'application/json'}));
+  save('tracker-backup-'+key(new Date())+'.json',new Blob([JSON.stringify({app:'daylog',version:1,exported:new Date().toISOString(),entries:A.map(x=>({day:x.k,...x.e}))})],{type:'application/json'}));
   S('dls:lb',String(Date.now()));bkUI(A.length);
 }
 $('#bku').onclick=backup;$('#nbk').onclick=backup;
@@ -800,7 +841,7 @@ $('#bkf').onchange=e=>{
   const f=e.target.files[0];e.target.value='';if(!f)return;
   f.text().then(t=>{
     let j;try{j=JSON.parse(t)}catch(x){j=null}
-    if(!j||j.app!=='daylog'||!Array.isArray(j.entries))return toast('That file isn’t a Day Log backup.');
+    if(!j||j.app!=='daylog'||!Array.isArray(j.entries))return toast('That file isn’t a Tracker backup.');
     const have=new Set(allEntries().map(x=>x.e.id)),by={};let add=0;
     for(const x of j.entries){
       if(!x||typeof x.task!=='string'||!x.task.trim()||!x.id||have.has(String(x.id))||!DK.test(x.day||''))continue;
@@ -844,7 +885,7 @@ function qaUI(A){
 }
 $('#q').oninput=()=>render();
 function wlShow(){
-  $('#wlt').textContent=allEntries().length?'What’s new in Day Log':'Welcome to Day Log';
+  $('#wlt').textContent=allEntries().length?'What’s new in Tracker':'Welcome to Tracker';
   let st=false;try{st=navigator.standalone||matchMedia('(display-mode: standalone)').matches}catch(e){}
   $('#wlh').hidden=!!st;$('#wl').showModal();
 }
@@ -919,7 +960,7 @@ function repData(){
 function drawReport(){
   const D=repData(),W=1080,H=1350,c=document.createElement('canvas');c.width=W;c.height=H;const x=c.getContext('2d');
   const cs=getComputedStyle(document.documentElement),v=n=>cs.getPropertyValue(n).trim(),A=v('--a'),A2=v('--a2'),INK=v('--ink'),MU=v('--mute'),dk=TH.dk;
-  const tr=(col,al)=>col.replace(/^hsl\(/,'hsla(').replace(/\)$/,','+al+')');
+  const tr=(col,al)=>{if(col[0]==='#'){const n=parseInt(col.slice(1),16);return'rgba('+(n>>16)+','+(n>>8&255)+','+(n&255)+','+al+')'}return col.replace(/^hsl\(/,'hsla(').replace(/\)$/,','+al+')')};
   const bg=x.createLinearGradient(0,0,W,H);bg.addColorStop(0,v('--g1'));bg.addColorStop(1,v('--bg'));x.fillStyle=bg;x.fillRect(0,0,W,H);
   const gl=(cx,cy,r,col,al)=>{const g=x.createRadialGradient(cx,cy,0,cx,cy,r);g.addColorStop(0,tr(col,al));g.addColorStop(1,tr(col,0));x.fillStyle=g;x.fillRect(0,0,W,H)};
   gl(160,120,560,A2,dk?.25:.55);gl(990,430,480,A,dk?.18:.3);gl(300,1250,600,A2,dk?.2:.45);
@@ -949,14 +990,17 @@ function drawReport(){
   D.act.forEach((a,i)=>{const y=1062+i*44;T(cut(a.l,470,30,500),96,y,30,500,INK);T(fmt(a.m),984,y,30,600,MU,'right');
     rr(590,y-18,Math.max(8,a.m/am*250),14,7);x.fillStyle=A;x.fill()});
   if(D.tg.length)T(cut('Tags: '+D.tg.map(([t,m])=>'#'+t+' '+fmt(m)).join('   '),936,28,500),72,1302,28,500,MU);
-  T('Made with Day Log',540,1336,24,500,tr(MU.startsWith('hsl')?MU:'hsl(0,0%,50%)',.7),'center');
+  T('Made with Tracker',540,1336,24,500,tr(MU.startsWith('hsl')?MU:'hsl(0,0%,50%)',.7),'center');
   return c;
 }
 let rpc=null;
 $('#rpt').onclick=()=>{rpc=drawReport();$('#rpi').src=rpc.toDataURL('image/png');$('#rp').showModal()};
 $('#rpx').onclick=()=>$('#rp').close();
-$('#rps').onclick=()=>{if(rpc)rpc.toBlob(b=>{if(b)save('day-log-week-'+key(wkStart(day))+'.png',b)},'image/png')};
+$('#rps').onclick=()=>{if(rpc)rpc.toBlob(b=>{if(b)save('tracker-week-'+key(wkStart(day))+'.png',b)},'image/png')};
 setTimeout(()=>{if(G('dls:wl')!=='2'&&!document.documentElement.classList.contains('locked')){S('dls:wl','2');wlShow()}},800);
+$('#nm').value=G('dls:nm')||'';$('#nm').oninput=()=>{S('dls:nm',$('#nm').value.trim());render()};
+$('#sa').onclick=()=>{mode='list';render(true);scrollTo(0,0)};
+try{matchMedia('(prefers-color-scheme: dark)').addEventListener('change',()=>{if(!G('dls:m')){applyTheme();render()}})}catch(e){}
 load();
 $('#off').textContent='Offline mode isn’t active yet. Open the app once with internet.';
 try{if(navigator.storage&&navigator.storage.persist)navigator.storage.persist()}catch(e){}
