@@ -42,6 +42,7 @@ function applyBg(t,dk){
  R.classList.add('ph');R.classList.toggle('pd',y<.5);R.classList.toggle('pl',y>=.5);
  var m=document.querySelector('meta[name=theme-color]');if(m)m.content=c;
 }
+try{if(localStorage.getItem('dls:pin'))document.documentElement.classList.add('locked')}catch(e){}
 applyTheme();
 </script>
 <style>
@@ -198,10 +199,42 @@ body[data-v=day] main{padding-bottom:60px}
 .tips{margin:0 0 4px;padding:0 0 0 20px;font-size:15px}.tips li{margin:0 0 9px}
 .bt .pri{background:var(--a);color:var(--on);padding:9px 18px;border-radius:12px;font-weight:600}
 body[data-v=day] #toast{bottom:calc(218px + env(safe-area-inset-bottom,0px))}#dup{margin-left:4px}
+.main .nt{font-size:13px;color:var(--mute);font-style:italic;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden;margin-top:2px}
+.tgr{flex:1 0 100%;display:flex;flex-wrap:wrap;gap:6px;padding:0 0 6px 52px}
+.tgp{font-size:12px;font-weight:600;color:var(--a);background:color-mix(in srgb,var(--a) 12%,transparent);border-radius:999px;padding:3px 10px}
+.tgs{display:flex;flex-wrap:wrap;gap:6px;margin:-4px 0 10px}
+#tf{margin-top:-4px}
+.goal{display:flex;align-items:center;gap:16px;padding:14px 16px;margin-top:14px}.goal.off{display:none}
+.ring{width:84px;height:84px;flex:none;transform:rotate(-90deg)}
+.ring circle{fill:none;stroke-width:9}.ring .rbg{stroke:var(--bd)}
+.ring .rfg{stroke:var(--a);stroke-linecap:round;stroke-dasharray:100;stroke-dashoffset:100;transition:stroke-dashoffset .9s cubic-bezier(.2,.8,.2,1)}
+.rtx{fill:var(--ink);font-size:19px;font-weight:700;text-anchor:middle}
+.gv{font-size:22px;font-weight:700}.goal.done .gv{color:var(--a)}.goal.done .ring{animation:pop .6s ease}
+.rpb{margin:14px 0 0}
+html.locked body>*:not(#lk){visibility:hidden}
+#lk{position:fixed;inset:0;z-index:200;display:none;flex-direction:column;align-items:center;justify-content:center;gap:14px;padding:24px;background:var(--bg)}
+html.locked #lk{display:flex}
+#lk img{border-radius:18px;box-shadow:0 8px 24px color-mix(in srgb,var(--a) 30%,transparent)}
+.lkt{font-size:20px;font-weight:700}
+.dots{display:flex;gap:14px;height:16px}.dots i{width:14px;height:14px;border-radius:50%;border:2px solid var(--a);transition:background .15s,transform .15s}.dots i.f{background:var(--a);transform:scale(1.15)}
+.shake{animation:shake .4s}@keyframes shake{20%,60%{transform:translateX(-9px)}40%,80%{transform:translateX(9px)}}
+.lke{color:var(--red);font-size:14px;min-height:18px}
+.pad{display:grid;grid-template-columns:repeat(3,72px);gap:14px}
+.pad button{height:72px;border-radius:50%;background:var(--gl);border:1px solid var(--glb);font-size:26px;font-weight:600;display:grid;place-items:center}
+.pad button svg{width:26px;height:26px}
+#rpi{width:100%;border-radius:12px;display:block}
 </style>
 </head>
 <body>
 <div id="bgp" aria-hidden="true"><i></i></div>
+<div id="lk" role="dialog" aria-modal="true" aria-label="Day Log is locked">
+  <img src="icon-192.png" alt="" width="72" height="72">
+  <div class="lkt">Enter your PIN</div>
+  <div class="dots" id="lkd" aria-hidden="true"></div>
+  <div class="lke" id="lke" role="alert"></div>
+  <div class="pad" id="lkp"></div>
+  <button class="mini" id="lkf">Forgot PIN?</button>
+</div>
 <main>
   <div class="top" data-s="day week">
     <button class="nav" id="prev" aria-label="Previous"><svg viewBox="0 0 12 20" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"><path d="M10 2 2 10l8 8"/></svg></button>
@@ -216,16 +249,22 @@ body[data-v=day] #toast{bottom:calc(218px + env(safe-area-inset-bottom,0px))}#du
     <div class="seg" id="seg"></div>
     <ul class="leg" id="leg"></ul>
   </section>
+  <section class="card goal off" id="goal" data-s="day week">
+    <svg class="ring" viewBox="0 0 84 84" aria-hidden="true"><circle class="rbg" cx="42" cy="42" r="34"/><circle class="rfg" id="rfg" cx="42" cy="42" r="34" pathLength="100"/><text class="rtx" id="rpc" x="42" y="49" transform="rotate(90 42 42)"></text></svg>
+    <div><div class="lbl">Weekly goal</div><div class="gv" id="gv"></div><div class="lbl" id="gs2"></div></div>
+  </section>
   <div data-s="day">
     <div class="card tmr" id="tmr" hidden><div class="tmi"><b id="tmn"></b><span id="tmt">00:00:00</span></div><div class="tmb"><button class="mini" id="tms">Stop</button><button class="mini" id="tmf">Finish</button><button class="mini" id="tmx" aria-label="Discard timer">Discard</button></div></div>
     <div class="card nudge" id="nudge" hidden><span>Back up your entries so a lost phone or cleared browser can’t wipe them.</span><div><button class="mini" id="nbk">Back up now</button><button class="mini" id="nlt">Later</button></div></div>
     <h2>Activity log</h2><ul class="card log" id="log"></ul></div>
+  <div class="rpb" data-s="week"><button class="mini" id="rpt"><i data-i="share"></i>Weekly report (image)</button></div>
   <div class="wk" id="wk" data-s="week"></div>
   <div data-s="list">
     <section class="card dlc"><div class="lbl">Download the full list (every entry with begin and finish dates)</div><div class="dl"><button id="dxl"><i data-i="dl"></i>Excel (.xlsx)</button><button id="dtx"><i data-i="dl"></i>Text (.txt)</button></div></section>
     <section class="card dlc"><div class="lbl">Combined summary of your entries (totals by activity, by week and by day)</div><select id="sp" class="in" aria-label="Summary period" style="margin:8px 0 10px"><option value="all">All time</option><option value="month">This month</option><option value="30">Last 30 days</option><option value="week">This week</option></select><div class="dl"><button id="sxl"><i data-i="dl"></i>Excel (.xlsx)</button><button id="stx"><i data-i="dl"></i>Text (.txt)</button></div></section>
     <input type="search" id="q" class="in" placeholder="Search your entries" aria-label="Search your entries" style="margin:0 0 10px">
     <div class="chips" id="fl"><button data-f="all" data-l="All">All</button><button data-f="open" data-l="In progress">In progress</button><button data-f="done" data-l="Finished">Finished</button></div>
+    <div class="chips" id="tf" hidden></div>
     <ul class="card log" id="all"></ul>
   </div>
   <div data-s="set">
@@ -251,9 +290,17 @@ body[data-v=day] #toast{bottom:calc(218px + env(safe-area-inset-bottom,0px))}#du
       <p class="lbl" id="off"></p>
       <p class="lbl" id="vs"></p><button class="mini" id="vdl" hidden><i data-i="dl"></i>Download offline voice now</button>
     </section>
+    <h2>Weekly goal</h2>
+    <section class="card priv">
+      <p>How many hours do you want to log each week? A progress ring shows on the Day and Week tabs.</p>
+      <label class="fl">Hours per week (0 turns it off)<input id="gin" class="in" type="number" min="0" max="168" step="0.5" inputmode="decimal"></label>
+    </section>
     <h2>Privacy</h2>
     <section class="card priv">
       <p>Entries stay on this phone. This page can’t send anything over the internet.</p>
+      <p class="lbl" id="pns"></p>
+      <div class="dl"><button id="pnb"><i data-i="lock"></i>Set a PIN</button><button class="mini" id="pnl" hidden>Lock now</button><button class="mini" id="pnx" hidden>Change PIN</button><button class="mini" id="pno" hidden>Turn off</button></div>
+      <p class="lbl" style="margin:10px 0 14px">A PIN keeps casual snoopers out. It does not encrypt your entries, so keep your phone’s own lock on too.</p>
       <button class="wipe" id="wipe">Erase all entries on this phone</button>
     </section>
     <h2>Backup</h2>
@@ -291,9 +338,23 @@ body[data-v=day] #toast{bottom:calc(218px + env(safe-area-inset-bottom,0px))}#du
     <li><b>Back up now and then.</b> Your entries live only on this phone. Settings has a backup you can restore.</li>
     <li><b>Changed your mind?</b> After you log, edit, finish or delete something, tap <b>Undo</b> in the message that pops up.</li>
     <li><b>Do it again.</b> Open an entry and tap “Log again today” to repeat it. Log every day to build a streak.</li>
+    <li><b>New:</b> add notes and #tags to entries, set a weekly goal, lock the app with a PIN, and save a weekly report as an image.</li>
     <li id="wlh"><b>Install it.</b> In Safari, tap Share, then Add to Home Screen.</li>
   </ul>
   <div class="bt"><span></span><button id="wlx" class="pri">Got it</button></div>
+</dialog>
+<dialog id="pd">
+  <div class="dt" id="pdt">Set a PIN</div>
+  <label class="fl" id="pl0">Current PIN<input id="pi0" class="in" type="password" inputmode="numeric" autocomplete="off" maxlength="6"></label>
+  <label class="fl" id="pl1">New PIN (4 to 6 digits)<input id="pi1" class="in" type="password" inputmode="numeric" autocomplete="off" maxlength="6"></label>
+  <label class="fl" id="pl2">Repeat new PIN<input id="pi2" class="in" type="password" inputmode="numeric" autocomplete="off" maxlength="6"></label>
+  <div class="err" id="pde"></div>
+  <div class="bt"><span></span><button id="pdc">Cancel</button><button id="pds" class="pri">Save</button></div>
+</dialog>
+<dialog id="rp">
+  <div class="dt">Weekly report</div>
+  <img id="rpi" alt="Weekly report preview">
+  <div class="bt"><span></span><button id="rpx">Close</button><button id="rps" class="pri">Save image</button></div>
 </dialog>
 <dialog id="ed">
   <div class="dt">Edit entry</div>
@@ -301,6 +362,8 @@ body[data-v=day] #toast{bottom:calc(218px + env(safe-area-inset-bottom,0px))}#du
   <label class="fl">Minutes spent<input id="em" class="in" type="number" min="0" inputmode="numeric"></label>
   <label class="fl">Began<input id="es" class="in" type="date"></label>
   <label class="fl">Finished (leave empty if not done)<input id="ef" class="in" type="date"></label>
+  <label class="fl">Notes<textarea id="en" class="in" rows="3" placeholder="Anything worth remembering"></textarea></label>
+  <label class="fl">Tags (separate with commas or spaces)<input id="eg" class="in" maxlength="80" placeholder="work, school"></label><div class="tgs" id="etg"></div>
   <div class="err" id="err"></div><button class="mini" id="gs"><i data-i="doc"></i>Get summary (.txt)</button> <button class="mini" id="dup"><i data-i="plus"></i>Log again today</button>
   <div class="bt"><button id="dlt" class="wipe">Delete</button><span></span><button id="cx">Cancel</button><button id="sv" class="pri">Save</button></div>
 </dialog>
@@ -316,11 +379,12 @@ const colorFor=s=>{let x=0;for(const c of s.toLowerCase())x=(x*31+c.charCodeAt(0
 const EM=[[/meet|call|zoom|sync/,'call'],[/mail|inbox/,'mail'],[/report|write|draft|doc/,'doc'],[/lunch|eat|coffee|break/,'cup'],[/code|debug|build|develop/,'code'],[/review|check/,'find'],[/plan|strategy|schedule/,'cal'],[/travel|drive|commute/,'car']];
 const iconFor=s=>{const m=EM.find(([r])=>r.test(s.toLowerCase()));return m?m[1]:'pen'};
 const IC={call:'M5 4h4l2 5-2.5 1.5a11 11 0 0 0 5 5L15 13l5 2v4a2 2 0 0 1-2 2A15 15 0 0 1 3 6a2 2 0 0 1 2-2z',mail:'M3 6h18v12H3zM3 7l9 7 9-7',doc:'M6 3h9l4 4v14H6zM14 3v5h5M9 13h7M9 17h5',cup:'M5 8h11v6a4 4 0 0 1-4 4H9a4 4 0 0 1-4-4zM16 9h2a2 2 0 0 1 0 4h-2M8 3v2M12 3v2',code:'M9 8l-5 4 5 4M15 8l5 4-5 4M13 5l-2 14',find:'M11 4a7 7 0 1 0 0 14 7 7 0 0 0 0-14zM16.5 16.5L21 21',cal:'M4 6h16v14H4zM4 10h16M8 3v4M16 3v4',car:'M5 16v-5l2-5h10l2 5v5zM3 16h18M7.5 13h.01M16.5 13h.01',pen:'M4 20l1-4L16 5l3 3L8 19zM14 7l3 3',sun:'M12 8a4 4 0 1 0 0 8 4 4 0 0 0 0-8zM12 2v2M12 20v2M2 12h2M20 12h2M5 5l1.5 1.5M17.5 17.5L19 19M5 19l1.5-1.5M17.5 6.5L19 5',moon:'M20 14.5A8 8 0 0 1 9.5 4 8 8 0 1 0 20 14.5z',week:'M4 5h16v15H4zM4 10h16M9 10v10M15 10v10',list:'M9 6h11M9 12h11M9 18h11M4 6h.01M4 12h.01M4 18h.01',sliders:'M4 8h9M17 8h3M4 16h3M11 16h9M15 5v6M9 13v6',dl:'M12 4v11M7 11l5 5 5-5M5 20h14',img:'M4 5h16v14H4zM4 16l5-5 4 4 3-3 4 4M9 9h.01',fill:'M4 8V4h4M20 8V4h-4M4 16v4h4M20 16v4h-4',fit:'M8 4v4H4M16 4v4h4M8 20v-4H4M16 20v-4h4',plus:'M12 5v14M5 12h14'};
+IC.lock='M7 11V8a5 5 0 0 1 10 0v3M5 11h14v9H5zM12 15v2';IC.share='M12 15V4M8 8l4-4 4 4M5 14v6h14v-6';IC.back='M20 5H9l-6 7 6 7h11zM11 9l5 6M16 9l-5 6';
 IC.up='M12 17V5M6.5 10.5 12 5l5.5 5.5M5 21h14';
 const svg=d=>'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path pathLength="1" d="'+d+'"/></svg>';
 document.querySelectorAll('[data-i]').forEach(n=>n.innerHTML=svg(IC[n.dataset.i]));
 const CHK='<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3.5" stroke-linecap="round" stroke-linejoin="round"><path pathLength="1" d="M5 12.5l4.5 4.5L19 7.5"/></svg>';
-let day=new Date(),entries=[],mode='day',fx=null,flt='all';
+let day=new Date(),entries=[],mode='day',fx=null,flt='all',tflt='';
 let voiceOn=G('dls:vo')==='1'||G('daylog:voice')==='1',localV=G('dls:lv')!=='0';
 
 const getDay=k=>{try{return JSON.parse(G('daylog:'+k))||[]}catch(e){return[]}};
@@ -332,6 +396,8 @@ function snapDays(keys){const o={};keys.forEach(k=>{o[k]=getDay(k)});return o}
 function restoreDays(o,all){if(all)dayKeys().forEach(k=>{if(!(k in o)){try{localStorage.removeItem('daylog:'+k)}catch(e){}}});Object.keys(o).forEach(k=>setDay(k,o[k]))}
 function withUndo(msg,keys,fn){const all=keys==='all',o=snapDays(all?dayKeys():keys);fn();toastAct(msg,'Undo',()=>{restoreDays(o,all);load();toast('Undone.')})}
 function streak(){const have=new Set(dayKeys()),d=new Date();let n=0;if(!have.has(key(d)))d.setDate(d.getDate()-1);while(have.has(key(d))){n++;d.setDate(d.getDate()-1)}return n}
+const tagList=v=>[...new Set((Array.isArray(v)?v:String(v||'').split(/[,\s]+/)).map(t=>String(t).replace(/^#/,'').toLowerCase().replace(/[^\p{L}\p{N}_-]/gu,'').slice(0,24)).filter(Boolean))].slice(0,8);
+const bkExtra=x=>{const o={};if(typeof x.note==='string'&&x.note.trim())o.note=x.note.trim();const t=tagList(x.tags);if(t.length)o.tags=t;return o};
 
 const wkStart=d=>{const x=new Date(d.getFullYear(),d.getMonth(),d.getDate());x.setDate(x.getDate()-((x.getDay()+6)%7));return x};
 function weekData(){const s=wkStart(day),out=[];for(let i=0;i<7;i++){const d=new Date(s);d.setDate(s.getDate()+i);out.push({d,k:key(d),en:getDay(key(d))})}return out}
@@ -352,10 +418,12 @@ function row(e,k,sum){
   const x={e,k},li=el('li',(e.done?'done ':'')+(e.id===fx?'fx':'')),t=el('span','tile'),sp=span(x);
   t.innerHTML=svg(IC[iconFor(e.task)]);t.style.setProperty('--c',colorFor(e.task));
   const m=el('button','main');m.append(el('div',0,e.task),el('small',0,'Began '+fd(e.start||k)+' · '+(e.done?'Finished '+fd(e.done)+(sp?' ('+sp+')':''):'In progress')));
+  if(e.note)m.append(el('div','nt',e.note));
   m.onclick=()=>openEd(e,k);
   const c=el('button','chk'+(e.done?' on':''));c.innerHTML=CHK;c.setAttribute('aria-label',e.done?'Mark not finished':'Mark finished');
   c.onclick=()=>{const td=key(new Date());if(!e.done&&(e.start||k)>td){toast('This entry hasn’t begun yet. Change its begin date first.');return}fx=e.id;withUndo(e.done?'Marked as not finished.':'Marked as finished.',[k],()=>mut(k,e.id,y=>{y.done=y.done?null:td}))};
   li.append(t,m,el('span','dur',e.mins?fmt(e.mins):''),c);
+  if(e.tags&&e.tags.length){const r=el('div','tgr');for(const g of e.tags){const b=el('button','tgp','#'+g);b.onclick=()=>{tflt=g;mode='list';render(true);scrollTo(0,0)};r.append(b)}li.append(r)}
   if(sum){const a=el('div','acts'),b=el('button','mini');b.innerHTML='<i>'+svg(IC.doc)+'</i>Get summary (.txt)';b.onclick=()=>dlSummary(x);a.append(b);li.append(a)}
   return li;
 }
@@ -388,37 +456,40 @@ function render(a){
     }
     if(!all.length)box.append(el('div','empty','Nothing logged this week.'));
   }else if(mode==='list'){
-    const A=allEntries(),n=A.filter(x=>x.e.done).length,qv=($('#q').value||'').trim().toLowerCase(),F=A.filter(x=>(flt==='done'?x.e.done:flt==='open'?!x.e.done:true)&&(!qv||x.e.task.toLowerCase().includes(qv))),u=$('#all'),cnt={all:A.length,open:A.length-n,done:n};
+    if(tflt&&!allEntries().some(x=>(x.e.tags||[]).includes(tflt)))tflt='';
+    const A=allEntries(),n=A.filter(x=>x.e.done).length,qv=($('#q').value||'').trim().toLowerCase(),F=A.filter(x=>(flt==='done'?x.e.done:flt==='open'?!x.e.done:true)&&(!qv||(x.e.task+' '+(x.e.note||'')+' '+(x.e.tags||[]).join(' ')).toLowerCase().includes(qv))&&(!tflt||(x.e.tags||[]).includes(tflt))),u=$('#all'),cnt={all:A.length,open:A.length-n,done:n};
     $('#title').textContent='All entries';
     $('#date').textContent=A.length?A.length+(A.length===1?' entry · ':' entries · ')+(A.length-n)+' in progress · '+n+' finished':'Nothing logged yet';
     document.querySelectorAll('#fl button').forEach(b=>{b.classList.toggle('on',b.dataset.f===flt);b.textContent=b.dataset.l+' '+cnt[b.dataset.f]});
+    {const tf=$('#tf'),tc=new Map();for(const x of A)for(const g of x.e.tags||[])tc.set(g,(tc.get(g)||0)+1);tf.replaceChildren();tf.hidden=!tc.size;
+     if(tc.size){const mk=(g,l)=>{const b=el('button',g===tflt?'on':'',l);b.onclick=()=>{tflt=g;render(true)};tf.append(b)};mk('','All tags');for(const[g,n]of[...tc.entries()].sort((a,b)=>b[1]-a[1]))mk(g,'#'+g+' '+n)}}
     u.replaceChildren();
     if(!F.length)u.append(el('li','empty',A.length?(qv?'No entries match your search.':'No entries in this filter.'):'No entries yet. Log something from the Day tab.'));
     for(const x of F)u.append(row(x.e,x.k,true));
   }else{$('#title').textContent='Settings';$('#date').textContent='Appearance, voice and privacy'}
-  fx=null;try{const A=allEntries();qaUI(A);bkUI(A.length);tmUI()}catch(e){}
+  fx=null;try{const A=allEntries();qaUI(A);bkUI(A.length);tmUI();goalUI()}catch(e){}
 }
 function load(a){entries=getDay(key(day));$('#bd').value=key(day);render(a)}
 
 // edit
 let ek=null,eid=null;
 const err=m=>{$('#err').textContent=m||''};
-function openEd(e,k){ek=k;eid=e.id;err();$('#et').value=e.task;$('#em').value=e.mins||'';$('#es').value=e.start||k;$('#ef').value=e.done||'';$('#ef').min=e.start||k;$('#ef').max=key(new Date());$('#ed').showModal()}
+function openEd(e,k){ek=k;eid=e.id;err();$('#et').value=e.task;$('#em').value=e.mins||'';$('#es').value=e.start||k;$('#ef').value=e.done||'';$('#en').value=e.note||'';$('#eg').value=(e.tags||[]).join(', ');etgUI();$('#ef').min=e.start||k;$('#ef').max=key(new Date());$('#ed').showModal()}
 $('#es').onchange=()=>{$('#ef').min=$('#es').value};
 $('#sv').onclick=()=>{
-  const t=$('#et').value.trim(),m=Math.max(0,Math.round(+$('#em').value||0))||null,s=$('#es').value,f=$('#ef').value||null;
+  const t=$('#et').value.trim(),m=Math.max(0,Math.round(+$('#em').value||0))||null,s=$('#es').value,f=$('#ef').value||null,nt=$('#en').value.trim(),tg=tagList($('#eg').value);
   if(!t)return err('Write what you did.');
   if(!s)return err('Pick a begin date.');
   if(f&&f<s)return err('The finish date can’t be before the begin date.');
   if(f&&f>key(new Date()))return err('The finish date can’t be in the future.');
-  withUndo('Entry updated.',[ek],()=>mut(ek,eid,x=>{x.task=t;x.icon=iconFor(t);x.mins=m;x.start=s;x.done=f}));$('#ed').close();
+  withUndo('Entry updated.',[ek],()=>mut(ek,eid,x=>{x.task=t;x.icon=iconFor(t);x.mins=m;x.start=s;x.done=f;if(nt)x.note=nt;else delete x.note;if(tg.length)x.tags=tg;else delete x.tags}));$('#ed').close();
 };
 $('#dlt').onclick=()=>{const a=getDay(ek),i=a.findIndex(x=>x.id===eid);if(i<0)return;const gone=a.splice(i,1)[0],k=ek;setDay(k,a);$('#ed').close();load();toastAct('Entry deleted.','Undo',()=>{const b=getDay(k);b.splice(Math.min(i,b.length),0,gone);setDay(k,b);load();toast('Entry restored.')})};
 $('#cx').onclick=()=>$('#ed').close();
 $('#dup').onclick=()=>{
   const e=getDay(ek).find(y=>y.id===eid);if(!e)return;const k=key(new Date()),id=Date.now().toString(36)+Math.random().toString(36).slice(2,6);
   $('#ed').close();day=new Date();fx=id;
-  withUndo('Added again for today.',[k],()=>{const a=getDay(k);a.push({id,at:new Date().toLocaleTimeString([],{hour:'numeric',minute:'2-digit'}),task:e.task,mins:e.mins||null,icon:e.icon||iconFor(e.task),start:k,done:null});setDay(k,a);load()});
+  withUndo('Added again for today.',[k],()=>{const a=getDay(k);a.push({id,at:new Date().toLocaleTimeString([],{hour:'numeric',minute:'2-digit'}),task:e.task,mins:e.mins||null,icon:e.icon||iconFor(e.task),start:k,done:null,...bkExtra(e)});setDay(k,a);load()});
 };
 $('#gs').onclick=()=>{const e=getDay(ek).find(y=>y.id===eid);if(e)dlSummary({e,k:ek})};
 
@@ -463,8 +534,8 @@ function parse(text){
   const yd=new Date();yd.setDate(yd.getDate()-1);
   return(out.length?out:[text]).map(c=>{
     c=c.replace(/\u0001/g,'.').replace(/\u0002/g,' and ').replace(/\u0003/g,'.').trim();
-    const d=dur(words(c)),task=clean(d.rest.replace(/\b(?:yesterday|today)\b/gi,' '),c);
-    return{task,minutes:d.m,icon:iconFor(task),done:/\b(?:finished|completed|done with|wrapped up)\b/i.test(c),start:/\byesterday\b/i.test(c)?key(yd):null};
+    const tg=tagList(c.match(/#[\p{L}\p{N}_-]+/gu)||[]);c=c.replace(/#[\p{L}\p{N}_-]+/gu,' ');const d=dur(words(c)),task=clean(d.rest.replace(/\b(?:yesterday|today)\b/gi,' '),c);
+    return{task:task||'Untitled',tags:tg,minutes:d.m,icon:iconFor(task),done:/\b(?:finished|completed|done with|wrapped up)\b/i.test(c),start:/\byesterday\b/i.test(c)?key(yd):null};
   });
 }
 const rs=()=>{const b=$('#box');b.style.height='44px';b.style.height=Math.min(b.scrollHeight,120)+'px'};
@@ -472,7 +543,7 @@ function submit(){
   const text=$('#box').value.trim();if(!text)return;
   const at=new Date().toLocaleTimeString([],{hour:'numeric',minute:'2-digit'}),start=$('#bd').value||key(day);
   fx=null;
-  for(const it of parse(text)){const id=Date.now().toString(36)+Math.random().toString(36).slice(2,6);if(!fx)fx=id;entries.push({id,at,task:it.task,mins:it.minutes,icon:it.icon,start:it.start||start,done:(it.done&&(it.start||start)<=key(new Date()))?key(new Date()):null})}
+  for(const it of parse(text)){const id=Date.now().toString(36)+Math.random().toString(36).slice(2,6);if(!fx)fx=id;entries.push({id,at,task:it.task,mins:it.minutes,icon:it.icon,...(it.tags&&it.tags.length?{tags:it.tags}:{}),start:it.start||start,done:(it.done&&(it.start||start)<=key(new Date()))?key(new Date()):null})}
   const k0=key(day),before=getDay(k0),n=entries.length-before.length;
   $('#box').value='';rs();setDay(k0,entries);load();say('Logged. Tap the mic for the next one.');
   toastAct('Logged '+n+(n===1?' entry.':' entries.'),'Undo',()=>{setDay(k0,before);load();toast('Undone.')});
@@ -548,7 +619,7 @@ const dn=s=>{const[y,m,d]=s.split('-');return Math.round(Date.UTC(y,m-1,d)/864e5
 const span=x=>{if(!x.e.done)return'';const n=dn(x.e.done)-dn(x.e.start||x.k);return n<=0?'same day':n+(n===1?' day':' days')};
 const fl=s=>{const[y,m,d]=s.split('-');return new Date(y,m-1,d).toLocaleDateString('en-GB',{day:'numeric',month:'short',year:'numeric'})};
 const stamp=()=>new Date().toLocaleString('en-GB',{day:'numeric',month:'short',year:'numeric',hour:'2-digit',minute:'2-digit',hour12:false});
-const blk=x=>['Task: '+x.e.task,'Time spent: '+(x.e.mins?fmt(x.e.mins):'not set'),'Began: '+fl(x.e.start||x.k),'Finished: '+(x.e.done?fl(x.e.done)+' ('+span(x)+')':'not finished yet'),'Status: '+(x.e.done?'Finished':'In progress'),'Logged: '+(x.e.at?x.e.at+' on ':'')+fl(x.k)];
+const blk=x=>['Task: '+x.e.task,'Time spent: '+(x.e.mins?fmt(x.e.mins):'not set'),'Began: '+fl(x.e.start||x.k),'Finished: '+(x.e.done?fl(x.e.done)+' ('+span(x)+')':'not finished yet'),'Status: '+(x.e.done?'Finished':'In progress'),'Logged: '+(x.e.at?x.e.at+' on ':'')+fl(x.k),...(x.e.tags&&x.e.tags.length?['Tags: '+x.e.tags.map(g=>'#'+g).join(' ')]:[]),...(x.e.note?['Notes: '+x.e.note.replace(/\s*\n\s*/g,' / ')]:[])];
 const asc=()=>allEntries().reverse();
 function zip(files){
   const T=new Uint32Array(256);for(let i=0;i<256;i++){let c=i;for(let k=0;k<8;k++)c=c&1?0xEDB88320^(c>>>1):c>>>1;T[i]=c>>>0}
@@ -566,11 +637,11 @@ function zip(files){
 function xlsx(L){
   const enc=new TextEncoder(),xe=s=>String(s).replace(/[\u0000-\u0008\u000B\u000C\u000E-\u001F]/g,'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;'),col=i=>String.fromCharCode(65+i);
   const cs=(r,i,v,s)=>`<c r="${col(i)}${r}" s="${s}" t="inlineStr"><is><t xml:space="preserve">${xe(v)}</t></is></c>`,cn=(r,i,v)=>`<c r="${col(i)}${r}"><v>${v}</v></c>`,cd=(r,i,v)=>`<c r="${col(i)}${r}" s="2"><v>${dn(v)+25569}</v></c>`;
-  const H=['No.','Task','Time spent (min)','Began','Finished','Status','Days to finish','Logged on','Logged at'];
+  const H=['No.','Task','Time spent (min)','Began','Finished','Status','Days to finish','Logged on','Logged at','Tags','Notes'];
   const rows=['<row r="1">'+H.map((h,i)=>cs(1,i,h,1)).join('')+'</row>',...L.map((x,j)=>{const r=j+2,e=x.e,b=e.start||x.k;
-    return'<row r="'+r+'">'+cn(r,0,j+1)+cs(r,1,e.task,3)+(e.mins?cn(r,2,e.mins):'')+cd(r,3,b)+(e.done?cd(r,4,e.done):'')+cs(r,5,e.done?'Finished':'In progress',0)+(e.done?cn(r,6,Math.max(0,dn(e.done)-dn(b))):'')+cd(r,7,x.k)+(e.at?cs(r,8,e.at,0):'')+'</row>'})];
-  const n=L.length+1,W=[6,48,16,14,14,13,15,14,12];
-  const sheet=`<worksheet xmlns="http://schemas.openxmlformats.org/spreadsheetml/2006/main"><dimension ref="A1:I${n}"/><sheetViews><sheetView workbookViewId="0"><pane ySplit="1" topLeftCell="A2" activePane="bottomLeft" state="frozen"/><selection pane="bottomLeft"/></sheetView></sheetViews><sheetFormatPr defaultRowHeight="15"/><cols>${W.map((w,i)=>`<col min="${i+1}" max="${i+1}" width="${w}" customWidth="1"/>`).join('')}</cols><sheetData>${rows.join('')}</sheetData><autoFilter ref="A1:I${n}"/></worksheet>`;
+    return'<row r="'+r+'">'+cn(r,0,j+1)+cs(r,1,e.task,3)+(e.mins?cn(r,2,e.mins):'')+cd(r,3,b)+(e.done?cd(r,4,e.done):'')+cs(r,5,e.done?'Finished':'In progress',0)+(e.done?cn(r,6,Math.max(0,dn(e.done)-dn(b))):'')+cd(r,7,x.k)+(e.at?cs(r,8,e.at,0):'')+(e.tags&&e.tags.length?cs(r,9,e.tags.map(g=>'#'+g).join(' '),0):'')+(e.note?cs(r,10,e.note,3):'')+'</row>'})];
+  const n=L.length+1,W=[6,48,16,14,14,13,15,14,12,18,44];
+  const sheet=`<worksheet xmlns="http://schemas.openxmlformats.org/spreadsheetml/2006/main"><dimension ref="A1:K${n}"/><sheetViews><sheetView workbookViewId="0"><pane ySplit="1" topLeftCell="A2" activePane="bottomLeft" state="frozen"/><selection pane="bottomLeft"/></sheetView></sheetViews><sheetFormatPr defaultRowHeight="15"/><cols>${W.map((w,i)=>`<col min="${i+1}" max="${i+1}" width="${w}" customWidth="1"/>`).join('')}</cols><sheetData>${rows.join('')}</sheetData><autoFilter ref="A1:K${n}"/></worksheet>`;
   const M='http://schemas.openxmlformats.org/spreadsheetml/2006/main',R='http://schemas.openxmlformats.org/officeDocument/2006/relationships',PK='http://schemas.openxmlformats.org/package/2006/relationships',X='<?xml version="1.0" encoding="UTF-8" standalone="yes"?>',f=(n,t)=>({n,d:enc.encode(X+t)});
   const ct=a=>`application/vnd.openxmlformats-officedocument.spreadsheetml.${a}+xml`;
   return zip([
@@ -734,7 +805,7 @@ $('#bkf').onchange=e=>{
     for(const x of j.entries){
       if(!x||typeof x.task!=='string'||!x.task.trim()||!x.id||have.has(String(x.id))||!DK.test(x.day||''))continue;
       have.add(String(x.id));const m=Math.round(+x.mins);
-      (by[x.day]=by[x.day]||getDay(x.day)).push({id:String(x.id),at:String(x.at||''),task:x.task.trim(),mins:m>0?m:null,icon:iconFor(x.task),start:DK.test(x.start||'')?x.start:x.day,done:DK.test(x.done||'')?x.done:null});add++;
+      (by[x.day]=by[x.day]||getDay(x.day)).push({id:String(x.id),at:String(x.at||''),task:x.task.trim(),mins:m>0?m:null,icon:iconFor(x.task),start:DK.test(x.start||'')?x.start:x.day,done:DK.test(x.done||'')?x.done:null,...bkExtra(x)});add++;
     }
     const snap=snapDays(Object.keys(by));Object.keys(by).forEach(d=>setDay(d,by[d]));load();
     const msg=add?'Restored '+add+(add===1?' entry.':' entries.'):'Nothing new to restore. Those entries are already here.';
@@ -778,7 +849,114 @@ function wlShow(){
   $('#wlh').hidden=!!st;$('#wl').showModal();
 }
 $('#wlx').onclick=()=>$('#wl').close();$('#wlb').onclick=wlShow;
-setTimeout(()=>{if(G('dls:wl')!=='1'){S('dls:wl','1');wlShow()}},800);
+/* ---- v3 features: tags in dialog, weekly goal, PIN lock, weekly report ---- */
+function etgUI(){const tc=new Map();for(const x of allEntries())for(const g of x.e.tags||[])tc.set(g,(tc.get(g)||0)+1);const b=$('#etg');b.replaceChildren();
+  for(const[g]of[...tc.entries()].sort((a,c)=>c[1]-a[1]).slice(0,8)){const t=el('button','tgp','#'+g);t.type='button';t.onclick=()=>{const cur=tagList($('#eg').value);if(!cur.includes(g))cur.push(g);$('#eg').value=cur.join(', ')};b.append(t)}}
+function goalUI(){
+  const g=parseFloat(G('dls:goal'))||0,c=$('#goal');c.classList.toggle('off',!(g>0));if(!(g>0))return;
+  const m=weekData().reduce((a,d)=>a+d.en.reduce((b,e)=>b+(e.mins||0),0),0),pc=Math.round(m/(g*60)*100),r=$('#rfg');
+  if(document.body.classList.contains('anim')){r.style.transition='none';r.style.strokeDashoffset=100;void r.getBoundingClientRect();r.style.transition=''}
+  r.style.strokeDashoffset=100-Math.min(100,pc);$('#rpc').textContent=pc+'%';$('#rpc').style.fontSize=pc>=100?'15px':'19px';$('#gv').textContent=fmt(m)+' of '+fmt(g*60);
+  $('#gs2').textContent=pc>=100?'Goal reached. Great week!':fmt(g*60-m)+' to go this week';c.classList.toggle('done',pc>=100);
+}
+$('#gin').value=G('dls:goal')||'';
+$('#gin').onchange=()=>{let v=parseFloat($('#gin').value);if(!(v>0))v=0;v=Math.min(168,v);S('dls:goal',String(v));$('#gin').value=v||'';goalUI();toast(v?'Weekly goal set to '+v+(v===1?' hour.':' hours.'):'Weekly goal turned off.')};
+
+// PIN lock (a privacy screen, not encryption)
+const PINK='dls:pin',CS=!!(window.crypto&&crypto.subtle);
+const pHex=b=>[...new Uint8Array(b)].map(x=>x.toString(16).padStart(2,'0')).join(''),pUn=h=>new Uint8Array((h.match(/../g)||[]).map(x=>parseInt(x,16)));
+async function pHash(pin,salt){const k=await crypto.subtle.importKey('raw',new TextEncoder().encode(pin),'PBKDF2',false,['deriveBits']);return pHex(await crypto.subtle.deriveBits({name:'PBKDF2',hash:'SHA-256',salt,iterations:150000},k,256))}
+const pinInfo=()=>{try{const o=JSON.parse(G(PINK));return o&&o.s&&o.h&&o.n?o:null}catch(e){return null}};
+const pwait=()=>Math.max(0,(+G('dls:pu')||0)-Date.now()),pclear=()=>{try{[PINK,'dls:pf','dls:pu'].forEach(k=>localStorage.removeItem(k))}catch(e){}};
+async function pinTry(pin){
+  const o=pinInfo();if(!o)return'ok';if(pwait()>0)return'wait';
+  if(await pHash(pin,pUn(o.s))===o.h){S('dls:pf','0');S('dls:pu','0');return'ok'}
+  const f=(+G('dls:pf')||0)+1;S('dls:pf',String(f));if(f>=5)S('dls:pu',String(Date.now()+Math.min(900,30*2**(f-5))*1000));return'bad';
+}
+let lkBuf='',lkBusy=false,hidAt=0;
+function lkDots(){const n=(pinInfo()||{n:4}).n;$('#lkd').replaceChildren(...Array.from({length:n},(_,i)=>{const d=el('i');if(i<lkBuf.length)d.className='f';return d}))}
+function lockApp(){if(!pinInfo())return;lkBuf='';document.documentElement.classList.add('locked');$('#lke').textContent='';lkDots();try{['ed','wl','pd','rp'].forEach(i=>{const d=$('#'+i);if(d.open)d.close()})}catch(e){}}
+function unlockApp(){document.documentElement.classList.remove('locked');lkBuf=''}
+const tooMany=()=>'Too many tries. Wait '+Math.ceil(pwait()/1000)+' s.';
+async function lkPress(d){
+  const o=pinInfo();if(!o||lkBusy)return;
+  if(pwait()>0){$('#lke').textContent=tooMany();return}
+  if(d==='del'){lkBuf=lkBuf.slice(0,-1);lkDots();return}
+  if(lkBuf.length>=o.n)return;lkBuf+=d;lkDots();if(lkBuf.length<o.n)return;
+  lkBusy=true;const r=await pinTry(lkBuf);lkBusy=false;
+  if(r==='ok'){unlockApp();return}
+  lkBuf='';lkDots();const dd=$('#lkd');dd.classList.remove('shake');void dd.offsetWidth;dd.classList.add('shake');
+  $('#lke').textContent=pwait()>0?tooMany():'Wrong PIN. Try again.';
+}
+['1','2','3','4','5','6','7','8','9','','0','del'].forEach(k=>{
+  if(!k){$('#lkp').append(el('span'));return}
+  const b=el('button');b.type='button';if(k==='del'){b.innerHTML=svg(IC.back);b.setAttribute('aria-label','Delete')}else b.textContent=k;b.onclick=()=>lkPress(k);$('#lkp').append(b);
+});
+addEventListener('keydown',e=>{if(!document.documentElement.classList.contains('locked'))return;if(/^\d$/.test(e.key))lkPress(e.key);else if(e.key==='Backspace')lkPress('del')});
+document.addEventListener('visibilitychange',()=>{if(document.hidden)hidAt=Date.now();else if(pinInfo()&&hidAt&&Date.now()-hidAt>30000)lockApp()});
+$('#lkf').onclick=()=>{if(!confirm('This erases every entry on this phone and removes the PIN. You can restore from a backup file afterwards. Continue?'))return;dayKeys().forEach(k=>{try{localStorage.removeItem('daylog:'+k)}catch(e){}});pclear();unlockApp();load();pnUI();toast('PIN removed and entries erased.')};
+function pnUI(){const on=!!pinInfo();$('#pns').textContent=!CS?'A PIN needs a secure (https) connection, so it is not available here.':on?'PIN is on. The app locks when you open it and after 30 seconds away.':'No PIN set.';$('#pnb').hidden=on||!CS;$('#pnl').hidden=$('#pnx').hidden=$('#pno').hidden=!on}
+let pm='set';
+function pinDlg(m){pm=m;$('#pdt').textContent={set:'Set a PIN',change:'Change PIN',off:'Turn off PIN'}[m];$('#pl0').hidden=m==='set';$('#pl1').hidden=$('#pl2').hidden=m==='off';['#pi0','#pi1','#pi2'].forEach(i=>{$(i).value=''});$('#pde').textContent='';$('#pd').showModal()}
+$('#pnb').onclick=()=>pinDlg('set');$('#pnx').onclick=()=>pinDlg('change');$('#pno').onclick=()=>pinDlg('off');$('#pnl').onclick=lockApp;$('#pdc').onclick=()=>$('#pd').close();
+$('#pds').onclick=async()=>{
+  const e=m=>{$('#pde').textContent=m},c=$('#pi0').value,a=$('#pi1').value,b=$('#pi2').value;
+  if(pm!=='set'){const r=await pinTry(c);if(r==='wait')return e(tooMany());if(r!=='ok')return e('That isn’t your current PIN.')}
+  if(pm==='off'){pclear();$('#pd').close();pnUI();toast('PIN turned off.');return}
+  if(!/^\d{4,6}$/.test(a))return e('Use 4 to 6 digits.');
+  if(a!==b)return e('The two PINs don’t match.');
+  const salt=crypto.getRandomValues(new Uint8Array(16));S(PINK,JSON.stringify({s:pHex(salt),h:await pHash(a,salt),n:a.length}));S('dls:pf','0');S('dls:pu','0');
+  $('#pd').close();pnUI();toast(pm==='set'?'PIN is on.':'PIN changed.');
+};
+pnUI();if(pinInfo())lockApp();
+
+// weekly report image
+function repData(){
+  const w=weekData(),days=w.map(d=>({d:d.d,m:d.en.reduce((a,e)=>a+(e.mins||0),0)})),all=w.flatMap(d=>d.en.map(e=>({e,k:d.k}))),act=new Map(),tg=new Map();
+  for(const x of all){const k=nm(x.e.task).toLowerCase(),o=act.get(k)||{l:nm(x.e.task),m:0,n:0};o.m+=x.e.mins||0;o.n++;act.set(k,o);for(const g of x.e.tags||[])tg.set(g,(tg.get(g)||0)+(x.e.mins||0))}
+  return{w,days,n:all.length,fin:all.filter(x=>x.e.done).length,tot:days.reduce((a,d)=>a+d.m,0),act:[...act.values()].sort((a,b)=>b.m-a.m||b.n-a.n).slice(0,5),tg:[...tg.entries()].sort((a,b)=>b[1]-a[1]).slice(0,5)};
+}
+function drawReport(){
+  const D=repData(),W=1080,H=1350,c=document.createElement('canvas');c.width=W;c.height=H;const x=c.getContext('2d');
+  const cs=getComputedStyle(document.documentElement),v=n=>cs.getPropertyValue(n).trim(),A=v('--a'),A2=v('--a2'),INK=v('--ink'),MU=v('--mute'),dk=TH.dk;
+  const tr=(col,al)=>col.replace(/^hsl\(/,'hsla(').replace(/\)$/,','+al+')');
+  const bg=x.createLinearGradient(0,0,W,H);bg.addColorStop(0,v('--g1'));bg.addColorStop(1,v('--bg'));x.fillStyle=bg;x.fillRect(0,0,W,H);
+  const gl=(cx,cy,r,col,al)=>{const g=x.createRadialGradient(cx,cy,0,cx,cy,r);g.addColorStop(0,tr(col,al));g.addColorStop(1,tr(col,0));x.fillStyle=g;x.fillRect(0,0,W,H)};
+  gl(160,120,560,A2,dk?.25:.55);gl(990,430,480,A,dk?.18:.3);gl(300,1250,600,A2,dk?.2:.45);
+  const rr=(a,b,w,h,r)=>{x.beginPath();x.moveTo(a+r,b);x.arcTo(a+w,b,a+w,b+h,r);x.arcTo(a+w,b+h,a,b+h,r);x.arcTo(a,b+h,a,b,r);x.arcTo(a,b,a+w,b,r);x.closePath()};
+  const card=(a,b,w,h)=>{rr(a,b,w,h,36);x.fillStyle=dk?'rgba(255,255,255,.07)':'rgba(255,255,255,.72)';x.fill();x.lineWidth=2;x.strokeStyle=dk?'rgba(255,255,255,.14)':'rgba(255,255,255,.9)';x.stroke()};
+  const F=(w,s)=>w+' '+s+'px -apple-system,BlinkMacSystemFont,Roboto,"Segoe UI",sans-serif',T=(s,a,b,size,w,col,al)=>{x.font=F(w,size);x.fillStyle=col;x.textAlign=al||'left';x.fillText(s,a,b)};
+  const cut=(s,max,size,w)=>{x.font=F(w,size);if(x.measureText(s).width<=max)return s;while(s.length>1&&x.measureText(s+'…').width>max)s=s.slice(0,-1);return s+'…'};
+  const w0=D.w[0].d,w6=D.w[6].d,rng=w0.toLocaleDateString('en-GB',{day:'numeric',month:'short'})+' – '+w6.toLocaleDateString('en-GB',{day:'numeric',month:'short',year:'numeric'});
+  T('Weekly report',72,150,76,700,INK);T(rng,72,206,36,400,MU);
+  card(48,250,984,250);T(fmt(D.tot),96,400,128,700,A);T('tracked this week',100,452,34,400,MU);
+  const g=parseFloat(G('dls:goal'))||0;
+  if(g>0){x.lineWidth=18;x.lineCap='round';x.strokeStyle=dk?'rgba(255,255,255,.15)':'rgba(0,0,0,.08)';x.beginPath();x.arc(880,365,76,0,Math.PI*2);x.stroke();
+    const p=Math.min(1,D.tot/(g*60));if(p>0){x.strokeStyle=A;x.beginPath();x.arc(880,365,76,-Math.PI/2,-Math.PI/2+p*Math.PI*2);x.stroke()}
+    T(Math.round(D.tot/(g*60)*100)+'%',880,380,44,700,INK,'center');T('of '+fmt(g*60)+' goal',880,478,26,400,MU,'center')}
+  else{T(String(D.n),880,392,96,700,INK,'center');T(D.n===1?'entry':'entries',880,440,30,400,MU,'center')}
+  T(D.fin+' finished  ·  '+(D.n-D.fin)+' in progress',72,562,34,600,INK);
+  card(48,600,984,330);T('Time per day',96,652,32,600,MU);
+  const mx=Math.max(...D.days.map(d=>d.m),1),bw=80,gap=(888-7*bw)/6;
+  if(!D.tot)T('No time tracked this week',540,800,34,400,MU,'center');
+  D.days.forEach((d,i)=>{const bx=96+i*(bw+gap),h=d.m?Math.max(10,d.m/mx*150):0;
+    if(h){const gr=x.createLinearGradient(0,870-h,0,870);gr.addColorStop(0,A2);gr.addColorStop(1,A);rr(bx,870-h,bw,h,14);x.fillStyle=gr;x.fill();T(fmt(d.m),bx+bw/2,860-h,24,600,INK,'center')}
+    else{rr(bx,862,bw,8,4);x.fillStyle=dk?'rgba(255,255,255,.15)':'rgba(0,0,0,.08)';x.fill()}
+    T(d.d.toLocaleDateString('en-GB',{weekday:'short'}),bx+bw/2,908,26,500,MU,'center')});
+  card(48,960,984,300);T('Top activities',96,1012,32,600,MU);
+  if(!D.act.length)T('Nothing logged yet',540,1130,34,400,MU,'center');
+  const am=Math.max(...D.act.map(a=>a.m),1);
+  D.act.forEach((a,i)=>{const y=1062+i*44;T(cut(a.l,470,30,500),96,y,30,500,INK);T(fmt(a.m),984,y,30,600,MU,'right');
+    rr(590,y-18,Math.max(8,a.m/am*250),14,7);x.fillStyle=A;x.fill()});
+  if(D.tg.length)T(cut('Tags: '+D.tg.map(([t,m])=>'#'+t+' '+fmt(m)).join('   '),936,28,500),72,1302,28,500,MU);
+  T('Made with Day Log',540,1336,24,500,tr(MU.startsWith('hsl')?MU:'hsl(0,0%,50%)',.7),'center');
+  return c;
+}
+let rpc=null;
+$('#rpt').onclick=()=>{rpc=drawReport();$('#rpi').src=rpc.toDataURL('image/png');$('#rp').showModal()};
+$('#rpx').onclick=()=>$('#rp').close();
+$('#rps').onclick=()=>{if(rpc)rpc.toBlob(b=>{if(b)save('day-log-week-'+key(wkStart(day))+'.png',b)},'image/png')};
+setTimeout(()=>{if(G('dls:wl')!=='2'&&!document.documentElement.classList.contains('locked')){S('dls:wl','2');wlShow()}},800);
 load();
 $('#off').textContent='Offline mode isn’t active yet. Open the app once with internet.';
 try{if(navigator.storage&&navigator.storage.persist)navigator.storage.persist()}catch(e){}
