@@ -184,6 +184,20 @@ html.pd :is(h1,.sub,h2,.nav){color:#fff;text-shadow:0 1px 10px rgba(0,0,0,.5)}
 html.pl :is(h1,.sub,h2,.nav){color:#0b1b14;text-shadow:0 1px 10px rgba(255,255,255,.6)}
 input[type=range]{width:100%;accent-color:var(--a);margin:4px 0 14px}
 #pc{margin-top:16px}#pc b{float:right;color:var(--ink);font-weight:600}
+.tmr{display:flex;align-items:center;justify-content:space-between;gap:10px;flex-wrap:wrap;padding:12px 14px;margin-bottom:12px}
+.tmi{display:flex;flex-direction:column;min-width:0}.tmi b{overflow-wrap:anywhere}
+.tmi span{font-size:28px;line-height:1.2;font-weight:700;font-variant-numeric:tabular-nums;color:var(--a)}
+.tmb{display:flex;gap:6px;flex-wrap:wrap}
+.nudge{padding:12px 14px;margin-bottom:12px;font-size:14px;display:flex;flex-direction:column;gap:10px}.nudge div{display:flex;gap:8px}
+.qa{margin:0 0 8px}.qa button{max-width:170px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+#tmgo{flex:none;width:34px;height:34px;margin-bottom:5px;border-radius:50%;display:grid;place-items:center;color:var(--a);border:1.5px solid var(--a)}
+#tmgo svg{width:18px;height:18px}
+#toast.act{pointer-events:auto;display:flex;align-items:center;gap:14px}
+#toast button{color:inherit;font-weight:700;text-decoration:underline;padding:4px 6px;min-height:32px}
+body[data-v=day] main{padding-bottom:60px}
+.tips{margin:0 0 4px;padding:0 0 0 20px;font-size:15px}.tips li{margin:0 0 9px}
+.bt .pri{background:var(--a);color:var(--on);padding:9px 18px;border-radius:12px;font-weight:600}
+body[data-v=day] #toast{bottom:calc(218px + env(safe-area-inset-bottom,0px))}#dup{margin-left:4px}
 </style>
 </head>
 <body>
@@ -202,11 +216,15 @@ input[type=range]{width:100%;accent-color:var(--a);margin:4px 0 14px}
     <div class="seg" id="seg"></div>
     <ul class="leg" id="leg"></ul>
   </section>
-  <div data-s="day"><h2>Activity log</h2><ul class="card log" id="log"></ul></div>
+  <div data-s="day">
+    <div class="card tmr" id="tmr" hidden><div class="tmi"><b id="tmn"></b><span id="tmt">00:00:00</span></div><div class="tmb"><button class="mini" id="tms">Stop</button><button class="mini" id="tmf">Finish</button><button class="mini" id="tmx" aria-label="Discard timer">Discard</button></div></div>
+    <div class="card nudge" id="nudge" hidden><span>Back up your entries so a lost phone or cleared browser can’t wipe them.</span><div><button class="mini" id="nbk">Back up now</button><button class="mini" id="nlt">Later</button></div></div>
+    <h2>Activity log</h2><ul class="card log" id="log"></ul></div>
   <div class="wk" id="wk" data-s="week"></div>
   <div data-s="list">
     <section class="card dlc"><div class="lbl">Download the full list (every entry with begin and finish dates)</div><div class="dl"><button id="dxl"><i data-i="dl"></i>Excel (.xlsx)</button><button id="dtx"><i data-i="dl"></i>Text (.txt)</button></div></section>
-    <section class="card dlc"><div class="lbl">Combined summary of all entries (totals by activity, by week and by day)</div><div class="dl"><button id="sxl"><i data-i="dl"></i>Excel (.xlsx)</button><button id="stx"><i data-i="dl"></i>Text (.txt)</button></div></section>
+    <section class="card dlc"><div class="lbl">Combined summary of your entries (totals by activity, by week and by day)</div><select id="sp" class="in" aria-label="Summary period" style="margin:8px 0 10px"><option value="all">All time</option><option value="month">This month</option><option value="30">Last 30 days</option><option value="week">This week</option></select><div class="dl"><button id="sxl"><i data-i="dl"></i>Excel (.xlsx)</button><button id="stx"><i data-i="dl"></i>Text (.txt)</button></div></section>
+    <input type="search" id="q" class="in" placeholder="Search your entries" aria-label="Search your entries" style="margin:0 0 10px">
     <div class="chips" id="fl"><button data-f="all" data-l="All">All</button><button data-f="open" data-l="In progress">In progress</button><button data-f="done" data-l="Finished">Finished</button></div>
     <ul class="card log" id="all"></ul>
   </div>
@@ -238,27 +256,52 @@ input[type=range]{width:100%;accent-color:var(--a);margin:4px 0 14px}
       <p>Entries stay on this phone. This page can’t send anything over the internet.</p>
       <button class="wipe" id="wipe">Erase all entries on this phone</button>
     </section>
+    <h2>Backup</h2>
+    <section class="card priv">
+      <p>Your entries live only in this browser. A backup file lets you restore them on a new phone or after clearing browser data. It is a private file that you keep.</p>
+      <p class="lbl" id="lbk"></p>
+      <div class="dl"><button id="bku"><i data-i="dl"></i>Back up (.json)</button><button id="bkr"><i data-i="up"></i>Restore</button></div>
+      <input type="file" id="bkf" accept=".json,application/json" hidden>
+    </section>
+    <h2>Help</h2>
+    <section class="card priv"><button class="mini" id="wlb">Show the welcome tips again</button></section>
   </div>
 </main>
 <div class="dock" data-s="day"><div>
+  <div class="chips qa" id="qa" hidden></div>
   <p id="say" aria-live="polite">Tap the mic and speak, or type below. No limit on length.</p>
   <label class="bdr">Begins <input type="date" id="bd"></label>
   <div class="ctl">
     <button id="mic" aria-label="Start talking"><svg viewBox="0 0 24 24" fill="currentColor"><path d="M12 14.5a3.5 3.5 0 0 0 3.5-3.5V6a3.5 3.5 0 0 0-7 0v5a3.5 3.5 0 0 0 3.5 3.5Z"/><path d="M5.5 10.5a1 1 0 0 1 2 0v.5a4.5 4.5 0 0 0 9 0v-.5a1 1 0 0 1 2 0v.5a6.5 6.5 0 0 1-5.5 6.42V20h2a1 1 0 0 1 0 2h-6a1 1 0 0 1 0-2h2v-2.58A6.5 6.5 0 0 1 5.5 11v-.5Z"/></svg></button>
     <div class="field">
       <textarea id="box" placeholder="Or type here" aria-label="Describe an activity"></textarea>
+      <button id="tmgo" aria-label="Start a timer"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="13.5" r="7.5"/><path d="M12 9.5v4l2.5 1.5M9.5 3h5M12 3v3"/></svg></button>
       <button id="go" aria-label="Log it"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><path d="M12 20V5M5.5 11.5 12 5l6.5 6.5"/></svg></button>
     </div>
   </div>
 </div></div>
 <input type="file" id="ph" accept="image/*" hidden><div id="toast" role="status"></div>
+<dialog id="wl">
+  <div class="dt" id="wlt">Welcome to Day Log</div>
+  <ul class="tips">
+    <li><b>Talk or type.</b> Tap the mic, or type. Say several things at once: “an hour on the report, then 30 minutes on email.”</li>
+    <li><b>Tap an entry to edit it.</b> Tap its circle to mark it finished.</li>
+    <li><b>Use the stopwatch</b> next to the send arrow to time a task live. Stop or Finish it when you’re done.</li>
+    <li><b>Find things fast</b> with the quick buttons above the keyboard and the search box in the List tab.</li>
+    <li><b>Back up now and then.</b> Your entries live only on this phone. Settings has a backup you can restore.</li>
+    <li><b>Changed your mind?</b> After you log, edit, finish or delete something, tap <b>Undo</b> in the message that pops up.</li>
+    <li><b>Do it again.</b> Open an entry and tap “Log again today” to repeat it. Log every day to build a streak.</li>
+    <li id="wlh"><b>Install it.</b> In Safari, tap Share, then Add to Home Screen.</li>
+  </ul>
+  <div class="bt"><span></span><button id="wlx" class="pri">Got it</button></div>
+</dialog>
 <dialog id="ed">
   <div class="dt">Edit entry</div>
   <label class="fl">What you did<textarea id="et" class="in" rows="3"></textarea></label>
   <label class="fl">Minutes spent<input id="em" class="in" type="number" min="0" inputmode="numeric"></label>
   <label class="fl">Began<input id="es" class="in" type="date"></label>
   <label class="fl">Finished (leave empty if not done)<input id="ef" class="in" type="date"></label>
-  <div class="err" id="err"></div><button class="mini" id="gs"><i data-i="doc"></i>Get summary (.txt)</button>
+  <div class="err" id="err"></div><button class="mini" id="gs"><i data-i="doc"></i>Get summary (.txt)</button> <button class="mini" id="dup"><i data-i="plus"></i>Log again today</button>
   <div class="bt"><button id="dlt" class="wipe">Delete</button><span></span><button id="cx">Cancel</button><button id="sv" class="pri">Save</button></div>
 </dialog>
 <script>
@@ -272,7 +315,8 @@ const G=k=>{try{return localStorage.getItem(k)}catch(e){return null}},S=(k,v)=>{
 const colorFor=s=>{let x=0;for(const c of s.toLowerCase())x=(x*31+c.charCodeAt(0))>>>0;return`hsl(${(TH.h+[-22,0,22][x%3]+360)%360},${Math.round(TH.s)}%,${TH.dk?56+(x>>3)%3*6:32+(x>>3)%3*7}%)`};
 const EM=[[/meet|call|zoom|sync/,'call'],[/mail|inbox/,'mail'],[/report|write|draft|doc/,'doc'],[/lunch|eat|coffee|break/,'cup'],[/code|debug|build|develop/,'code'],[/review|check/,'find'],[/plan|strategy|schedule/,'cal'],[/travel|drive|commute/,'car']];
 const iconFor=s=>{const m=EM.find(([r])=>r.test(s.toLowerCase()));return m?m[1]:'pen'};
-const IC={call:'M5 4h4l2 5-2.5 1.5a11 11 0 0 0 5 5L15 13l5 2v4a2 2 0 0 1-2 2A15 15 0 0 1 3 6a2 2 0 0 1 2-2z',mail:'M3 6h18v12H3zM3 7l9 7 9-7',doc:'M6 3h9l4 4v14H6zM14 3v5h5M9 13h7M9 17h5',cup:'M5 8h11v6a4 4 0 0 1-4 4H9a4 4 0 0 1-4-4zM16 9h2a2 2 0 0 1 0 4h-2M8 3v2M12 3v2',code:'M9 8l-5 4 5 4M15 8l5 4-5 4M13 5l-2 14',find:'M11 4a7 7 0 1 0 0 14 7 7 0 0 0 0-14zM16.5 16.5L21 21',cal:'M4 6h16v14H4zM4 10h16M8 3v4M16 3v4',car:'M5 16v-5l2-5h10l2 5v5zM3 16h18M7.5 13h.01M16.5 13h.01',pen:'M4 20l1-4L16 5l3 3L8 19zM14 7l3 3',sun:'M12 8a4 4 0 1 0 0 8 4 4 0 0 0 0-8zM12 2v2M12 20v2M2 12h2M20 12h2M5 5l1.5 1.5M17.5 17.5L19 19M5 19l1.5-1.5M17.5 6.5L19 5',moon:'M20 14.5A8 8 0 0 1 9.5 4 8 8 0 1 0 20 14.5z',week:'M4 5h16v15H4zM4 10h16M9 10v10M15 10v10',list:'M9 6h11M9 12h11M9 18h11M4 6h.01M4 12h.01M4 18h.01',sliders:'M4 8h9M17 8h3M4 16h3M11 16h9M15 5v6M9 13v6',dl:'M12 4v11M7 11l5 5 5-5M5 20h14',img:'M4 5h16v14H4zM4 16l5-5 4 4 3-3 4 4M9 9h.01',fill:'M4 8V4h4M20 8V4h-4M4 16v4h4M20 16v4h-4',fit:'M8 4v4H4M16 4v4h4M8 20v-4H4M16 20v-4h4'};
+const IC={call:'M5 4h4l2 5-2.5 1.5a11 11 0 0 0 5 5L15 13l5 2v4a2 2 0 0 1-2 2A15 15 0 0 1 3 6a2 2 0 0 1 2-2z',mail:'M3 6h18v12H3zM3 7l9 7 9-7',doc:'M6 3h9l4 4v14H6zM14 3v5h5M9 13h7M9 17h5',cup:'M5 8h11v6a4 4 0 0 1-4 4H9a4 4 0 0 1-4-4zM16 9h2a2 2 0 0 1 0 4h-2M8 3v2M12 3v2',code:'M9 8l-5 4 5 4M15 8l5 4-5 4M13 5l-2 14',find:'M11 4a7 7 0 1 0 0 14 7 7 0 0 0 0-14zM16.5 16.5L21 21',cal:'M4 6h16v14H4zM4 10h16M8 3v4M16 3v4',car:'M5 16v-5l2-5h10l2 5v5zM3 16h18M7.5 13h.01M16.5 13h.01',pen:'M4 20l1-4L16 5l3 3L8 19zM14 7l3 3',sun:'M12 8a4 4 0 1 0 0 8 4 4 0 0 0 0-8zM12 2v2M12 20v2M2 12h2M20 12h2M5 5l1.5 1.5M17.5 17.5L19 19M5 19l1.5-1.5M17.5 6.5L19 5',moon:'M20 14.5A8 8 0 0 1 9.5 4 8 8 0 1 0 20 14.5z',week:'M4 5h16v15H4zM4 10h16M9 10v10M15 10v10',list:'M9 6h11M9 12h11M9 18h11M4 6h.01M4 12h.01M4 18h.01',sliders:'M4 8h9M17 8h3M4 16h3M11 16h9M15 5v6M9 13v6',dl:'M12 4v11M7 11l5 5 5-5M5 20h14',img:'M4 5h16v14H4zM4 16l5-5 4 4 3-3 4 4M9 9h.01',fill:'M4 8V4h4M20 8V4h-4M4 16v4h4M20 16v4h-4',fit:'M8 4v4H4M16 4v4h4M8 20v-4H4M16 20v-4h4',plus:'M12 5v14M5 12h14'};
+IC.up='M12 17V5M6.5 10.5 12 5l5.5 5.5M5 21h14';
 const svg=d=>'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path pathLength="1" d="'+d+'"/></svg>';
 document.querySelectorAll('[data-i]').forEach(n=>n.innerHTML=svg(IC[n.dataset.i]));
 const CHK='<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3.5" stroke-linecap="round" stroke-linejoin="round"><path pathLength="1" d="M5 12.5l4.5 4.5L19 7.5"/></svg>';
@@ -284,6 +328,10 @@ function setDay(k,a){try{a.length?localStorage.setItem('daylog:'+k,JSON.stringif
 const dayKeys=()=>{try{return Object.keys(localStorage).filter(k=>/^daylog:\d{4}-\d\d-\d\d$/.test(k)).map(k=>k.slice(7))}catch(e){return[]}};
 function allEntries(){return dayKeys().flatMap(k=>getDay(k).map(e=>({e,k}))).sort((a,b)=>(b.e.start||b.k).localeCompare(a.e.start||a.k)||String(b.e.id).localeCompare(String(a.e.id)))}
 function mut(k,id,fn){const a=getDay(k),x=a.find(y=>y.id===id);if(x)fn(x);setDay(k,a);load()}
+function snapDays(keys){const o={};keys.forEach(k=>{o[k]=getDay(k)});return o}
+function restoreDays(o,all){if(all)dayKeys().forEach(k=>{if(!(k in o)){try{localStorage.removeItem('daylog:'+k)}catch(e){}}});Object.keys(o).forEach(k=>setDay(k,o[k]))}
+function withUndo(msg,keys,fn){const all=keys==='all',o=snapDays(all?dayKeys():keys);fn();toastAct(msg,'Undo',()=>{restoreDays(o,all);load();toast('Undone.')})}
+function streak(){const have=new Set(dayKeys()),d=new Date();let n=0;if(!have.has(key(d)))d.setDate(d.getDate()-1);while(have.has(key(d))){n++;d.setDate(d.getDate()-1)}return n}
 
 const wkStart=d=>{const x=new Date(d.getFullYear(),d.getMonth(),d.getDate());x.setDate(x.getDate()-((x.getDay()+6)%7));return x};
 function weekData(){const s=wkStart(day),out=[];for(let i=0;i<7;i++){const d=new Date(s);d.setDate(s.getDate()+i);out.push({d,k:key(d),en:getDay(key(d))})}return out}
@@ -306,7 +354,7 @@ function row(e,k,sum){
   const m=el('button','main');m.append(el('div',0,e.task),el('small',0,'Began '+fd(e.start||k)+' · '+(e.done?'Finished '+fd(e.done)+(sp?' ('+sp+')':''):'In progress')));
   m.onclick=()=>openEd(e,k);
   const c=el('button','chk'+(e.done?' on':''));c.innerHTML=CHK;c.setAttribute('aria-label',e.done?'Mark not finished':'Mark finished');
-  c.onclick=()=>{const td=key(new Date());if(!e.done&&(e.start||k)>td){toast('This entry hasn’t begun yet. Change its begin date first.');return}fx=e.id;mut(k,e.id,y=>{y.done=y.done?null:td})};
+  c.onclick=()=>{const td=key(new Date());if(!e.done&&(e.start||k)>td){toast('This entry hasn’t begun yet. Change its begin date first.');return}fx=e.id;withUndo(e.done?'Marked as not finished.':'Marked as finished.',[k],()=>mut(k,e.id,y=>{y.done=y.done?null:td}))};
   li.append(t,m,el('span','dur',e.mins?fmt(e.mins):''),c);
   if(sum){const a=el('div','acts'),b=el('button','mini');b.innerHTML='<i>'+svg(IC.doc)+'</i>Get summary (.txt)';b.onclick=()=>dlSummary(x);a.append(b);li.append(a)}
   return li;
@@ -320,7 +368,7 @@ function render(a){
   if(mode==='day'){
     const today=key(day)===key(now);
     $('#title').textContent=today?'Today':day.toLocaleDateString(undefined,{weekday:'long'});
-    $('#date').textContent=day.toLocaleDateString(undefined,{month:'long',day:'numeric',year:'numeric'});
+    $('#date').textContent=day.toLocaleDateString(undefined,{month:'long',day:'numeric',year:'numeric'})+(today&&streak()>1?' · '+streak()+'-day streak':'');
     $('#next').disabled=today;summary(entries);
     const ll=$('#log');ll.replaceChildren();
     if(!entries.length)ll.append(el('li','empty','Nothing logged yet. Tap the mic and say what you did.'));
@@ -340,15 +388,15 @@ function render(a){
     }
     if(!all.length)box.append(el('div','empty','Nothing logged this week.'));
   }else if(mode==='list'){
-    const A=allEntries(),n=A.filter(x=>x.e.done).length,F=A.filter(x=>flt==='done'?x.e.done:flt==='open'?!x.e.done:true),u=$('#all'),cnt={all:A.length,open:A.length-n,done:n};
+    const A=allEntries(),n=A.filter(x=>x.e.done).length,qv=($('#q').value||'').trim().toLowerCase(),F=A.filter(x=>(flt==='done'?x.e.done:flt==='open'?!x.e.done:true)&&(!qv||x.e.task.toLowerCase().includes(qv))),u=$('#all'),cnt={all:A.length,open:A.length-n,done:n};
     $('#title').textContent='All entries';
     $('#date').textContent=A.length?A.length+(A.length===1?' entry · ':' entries · ')+(A.length-n)+' in progress · '+n+' finished':'Nothing logged yet';
     document.querySelectorAll('#fl button').forEach(b=>{b.classList.toggle('on',b.dataset.f===flt);b.textContent=b.dataset.l+' '+cnt[b.dataset.f]});
     u.replaceChildren();
-    if(!F.length)u.append(el('li','empty',A.length?'No entries in this filter.':'No entries yet. Log something from the Day tab.'));
+    if(!F.length)u.append(el('li','empty',A.length?(qv?'No entries match your search.':'No entries in this filter.'):'No entries yet. Log something from the Day tab.'));
     for(const x of F)u.append(row(x.e,x.k,true));
   }else{$('#title').textContent='Settings';$('#date').textContent='Appearance, voice and privacy'}
-  fx=null;
+  fx=null;try{const A=allEntries();qaUI(A);bkUI(A.length);tmUI()}catch(e){}
 }
 function load(a){entries=getDay(key(day));$('#bd').value=key(day);render(a)}
 
@@ -363,15 +411,31 @@ $('#sv').onclick=()=>{
   if(!s)return err('Pick a begin date.');
   if(f&&f<s)return err('The finish date can’t be before the begin date.');
   if(f&&f>key(new Date()))return err('The finish date can’t be in the future.');
-  mut(ek,eid,x=>{x.task=t;x.icon=iconFor(t);x.mins=m;x.start=s;x.done=f});$('#ed').close();
+  withUndo('Entry updated.',[ek],()=>mut(ek,eid,x=>{x.task=t;x.icon=iconFor(t);x.mins=m;x.start=s;x.done=f}));$('#ed').close();
 };
-$('#dlt').onclick=()=>{if(!confirm('Delete this entry?'))return;setDay(ek,getDay(ek).filter(x=>x.id!==eid));$('#ed').close();load()};
+$('#dlt').onclick=()=>{const a=getDay(ek),i=a.findIndex(x=>x.id===eid);if(i<0)return;const gone=a.splice(i,1)[0],k=ek;setDay(k,a);$('#ed').close();load();toastAct('Entry deleted.','Undo',()=>{const b=getDay(k);b.splice(Math.min(i,b.length),0,gone);setDay(k,b);load();toast('Entry restored.')})};
 $('#cx').onclick=()=>$('#ed').close();
+$('#dup').onclick=()=>{
+  const e=getDay(ek).find(y=>y.id===eid);if(!e)return;const k=key(new Date()),id=Date.now().toString(36)+Math.random().toString(36).slice(2,6);
+  $('#ed').close();day=new Date();fx=id;
+  withUndo('Added again for today.',[k],()=>{const a=getDay(k);a.push({id,at:new Date().toLocaleTimeString([],{hour:'numeric',minute:'2-digit'}),task:e.task,mins:e.mins||null,icon:e.icon||iconFor(e.task),start:k,done:null});setDay(k,a);load()});
+};
 $('#gs').onclick=()=>{const e=getDay(ek).find(y=>y.id===eid);if(e)dlSummary({e,k:ek})};
 
 // parse + add (no length limits)
+const NW={zero:0,one:1,two:2,three:3,four:4,five:5,six:6,seven:7,eight:8,nine:9,ten:10,eleven:11,twelve:12,thirteen:13,fourteen:14,fifteen:15,sixteen:16,seventeen:17,eighteen:18,nineteen:19,twenty:20,thirty:30,forty:40,fifty:50,sixty:60,seventy:70,eighty:80,ninety:90},UNIT='(?=\\s*(?:hours?|hrs?|minutes?|mins?)\\b)';
+function words(s){
+  return s.replace(new RegExp('\\b('+Object.keys(NW).join('|')+')\\s+and\\s+a\\s+half\\s+(hours?|hrs?)\\b','gi'),(_,w,u)=>(NW[w.toLowerCase()]+.5)+' '+u)
+    .replace(/\b(?:a\s+)?(three\s+)?quarters?\s+(?:of\s+)?an\s+hour\b/gi,(_,t)=>t?'45 minutes':'15 minutes')
+    .replace(/\ba\s+couple\s+of\s+(?=hours?|minutes?|mins?)/gi,'2 ')
+    .replace(new RegExp('\\b(twenty|thirty|forty|fifty|sixty|seventy|eighty|ninety)[- ](one|two|three|four|five|six|seven|eight|nine)\\b'+UNIT,'gi'),(_,a,b)=>NW[a.toLowerCase()]+NW[b.toLowerCase()])
+    .replace(new RegExp('\\b('+Object.keys(NW).join('|')+')\\b'+UNIT,'gi'),(_,w)=>NW[w.toLowerCase()])
+    .replace(/\b(\d+)\s+and\s+a\s+half\s+(hours?|hrs?)\b/gi,(_,n,u)=>(+n+.5)+' '+u);
+}
 function dur(s){
   let m=0,r=s;
+  r=r.replace(/\b(\d+)\s*h(?:ours?|rs?)?\s*(\d{1,2})\s*(?:m(?:in(?:ute)?s?)?)?(?!\w)/gi,(_,h,mi)=>{m+=+h*60+ +mi;return' '});
+  r=r.replace(/\b(\d+(?:\.\d+)?)\s*h\b/gi,(_,h)=>{m+=parseFloat(h)*60;return' '});
   r=r.replace(/an hour and a half|one and a half hours?/gi,()=>{m+=90;return' '});
   r=r.replace(/half an hour|half hour/gi,()=>{m+=30;return' '});
   r=r.replace(/\b(\d+(?:\.\d+)?)\s*(?:hours?|hrs?)(?:\s*(?:and\s*)?(\d+)\s*(?:minutes?|mins?))?/gi,(_,h,mi)=>{m+=parseFloat(h)*60+(mi?+mi:0);return' '});
@@ -381,23 +445,37 @@ function dur(s){
 }
 function clean(s,orig){
   let t=s.replace(/\s+/g,' ').trim(),p;
-  const lead=/^(?:i|i’m|i'm|i’ve|i've|just|spent|spend|worked|working|on|for|about|around|and|had|did|doing|was|in|at|a bit|some)\b[\s,]*/i;
+  const lead=/^(?:i|i’m|i'm|i’ve|i've|just|spent|spend|worked|working|on|for|about|around|and|had|did|doing|was|in|at|a bit|some|finished|completed|done with|wrapped up)\b[\s,]*/i;
   do{p=t;t=t.replace(lead,'')}while(t!==p);
   t=t.replace(/[\s,]*\b(?:for|about|around)\s*$/i,'').replace(/^[\s,]+|[\s,]+$/g,'');
   if(!t)t=orig.trim();
   return t.charAt(0).toUpperCase()+t.slice(1);
 }
+const hasD=s=>/\d+(?:\.\d+)?\s*(?:h|hrs?|hours?|mins?|minutes?)\b|\b(?:an|one)\s+hour\b|half\s+(?:an?\s+)?hour/i.test(words(s));
 function parse(text){
-  const parts=text.split(/\s*(?:\band then\b|\bthen\b|\bafter that\b|\bafterwards\b|[.;])\s*/i).map(x=>x.trim()).filter(Boolean);
-  return(parts.length?parts:[text]).map(p=>{const d=dur(p),task=clean(d.rest,p);return{task,minutes:d.m,icon:iconFor(task)}});
+  const t=text.replace(/\b([ap])\.m\./gi,'$1m').replace(/\b(Dr|Mr|Mrs|Ms|Prof|St|vs|etc)\./gi,'$1\u0001').replace(/(\d)\.(\d)/g,'$1\u0003$2').replace(/(hours?|hrs?|an hour)\s+and\s+(?=\d+\s*(?:minutes?|mins?)|a\s+half)/gi,'$1\u0002');
+  const out=[];
+  for(const p of t.split(/\s*(?:\band then\b|\bthen\b|\bafter that\b|\bafterwards\b|;|\n|\.)\s*/i).map(x=>x.trim()).filter(Boolean)){
+    const bits=p.split(/(\s*,\s*|\s+and\s+)/i);let buf='';
+    for(let i=0;i<bits.length;i+=2){buf+=bits[i];if(hasD(buf)){out.push(buf);buf=''}else if(bits[i+1])buf+=bits[i+1]}
+    if(buf.trim())out.push(buf);
+  }
+  const yd=new Date();yd.setDate(yd.getDate()-1);
+  return(out.length?out:[text]).map(c=>{
+    c=c.replace(/\u0001/g,'.').replace(/\u0002/g,' and ').replace(/\u0003/g,'.').trim();
+    const d=dur(words(c)),task=clean(d.rest.replace(/\b(?:yesterday|today)\b/gi,' '),c);
+    return{task,minutes:d.m,icon:iconFor(task),done:/\b(?:finished|completed|done with|wrapped up)\b/i.test(c),start:/\byesterday\b/i.test(c)?key(yd):null};
+  });
 }
 const rs=()=>{const b=$('#box');b.style.height='44px';b.style.height=Math.min(b.scrollHeight,120)+'px'};
 function submit(){
   const text=$('#box').value.trim();if(!text)return;
   const at=new Date().toLocaleTimeString([],{hour:'numeric',minute:'2-digit'}),start=$('#bd').value||key(day);
   fx=null;
-  for(const it of parse(text)){const id=Date.now().toString(36)+Math.random().toString(36).slice(2,6);if(!fx)fx=id;entries.push({id,at,task:it.task,mins:it.minutes,icon:it.icon,start,done:null})}
-  $('#box').value='';rs();setDay(key(day),entries);load();say('Logged. Tap the mic for the next one.');
+  for(const it of parse(text)){const id=Date.now().toString(36)+Math.random().toString(36).slice(2,6);if(!fx)fx=id;entries.push({id,at,task:it.task,mins:it.minutes,icon:it.icon,start:it.start||start,done:(it.done&&(it.start||start)<=key(new Date()))?key(new Date()):null})}
+  const k0=key(day),before=getDay(k0),n=entries.length-before.length;
+  $('#box').value='';rs();setDay(k0,entries);load();say('Logged. Tap the mic for the next one.');
+  toastAct('Logged '+n+(n===1?' entry.':' entries.'),'Undo',()=>{setDay(k0,before);load();toast('Undone.')});
 }
 $('#box').oninput=rs;$('#go').onclick=submit;
 
@@ -406,9 +484,9 @@ const SR=window.SpeechRecognition||window.webkitSpeechRecognition;
 let rec=null,want=false,base='',got=false;
 const HI=!!SR&&typeof SR.install==='function'&&typeof SR.available==='function',VL=()=>navigator.language||'en-US';
 const vgN=()=>parseInt(G('dls:vg'))||0;
-let vst=HI?(vgN()>=3?'crashed':'idle'):'unsupported',vbusy=false;
+let vst=HI?(vgN()>=1?'crashed':'idle'):'unsupported',vbusy=false;
 function vsUI(){
-  const T={idle:'Offline voice downloads itself the first time you open the app with internet. Tap the button below to do it now.',crashed:'Setting up offline voice was interrupted a few times, so it paused. Tap the button below to try again. Your keyboard’s mic key still works offline.',ready:'Offline voice is installed and ready on this device.',downloading:'Downloading the offline voice pack (one time). Keep the app open until it finishes.',downloadable:'The offline voice pack isn’t installed yet. Tap the button below to download it.',checking:'Checking offline voice…',unavailable:'Offline voice isn’t available in this browser. Your keyboard’s mic key still works offline.',unsupported:'This browser doesn’t let web apps install an offline voice pack. Your keyboard’s mic key still works offline.'};
+  const T={idle:'Offline voice downloads itself the first time you open the app with internet. Tap the button below to do it now.',crashed:'Setting up offline voice was interrupted, so it paused. Tap the button below to try again. Your keyboard’s mic key still works offline.',ready:'Offline voice is installed and ready on this device.',downloading:'Downloading the offline voice pack (one time). Keep the app open until it finishes.',downloadable:'The offline voice pack isn’t installed yet. Tap the button below to download it.',checking:'Checking offline voice…',unavailable:'Offline voice isn’t available in this browser. Your keyboard’s mic key still works offline.',unsupported:'This browser doesn’t let web apps install an offline voice pack. Your keyboard’s mic key still works offline.'};
   $('#vs').textContent=T[vst]||'';$('#vdl').hidden=!(vst==='idle'||vst==='downloadable'||vst==='crashed');
 }
 async function prepVoice(){
@@ -464,7 +542,8 @@ $('#mic').onclick=()=>{
 };
 
 // export
-let tt;function toast(m){const t=$('#toast');t.textContent=m;t.classList.add('on');clearTimeout(tt);tt=setTimeout(()=>t.classList.remove('on'),2800)}
+let tt;function toast(m,ms){const t=$('#toast');t.textContent=m;t.classList.remove('act');t.classList.add('on');clearTimeout(tt);tt=setTimeout(()=>t.classList.remove('on'),ms||2800)}
+function toastAct(m,label,fn){const t=$('#toast'),b=el('button',0,label);b.onclick=()=>{clearTimeout(tt);t.classList.remove('on');fn()};t.replaceChildren(el('span',0,m),b);t.classList.add('act','on');clearTimeout(tt);tt=setTimeout(()=>t.classList.remove('on'),7000)}
 const dn=s=>{const[y,m,d]=s.split('-');return Math.round(Date.UTC(y,m-1,d)/864e5)};
 const span=x=>{if(!x.e.done)return'';const n=dn(x.e.done)-dn(x.e.start||x.k);return n<=0?'same day':n+(n===1?' day':' days')};
 const fl=s=>{const[y,m,d]=s.split('-');return new Date(y,m-1,d).toLocaleDateString('en-GB',{day:'numeric',month:'short',year:'numeric'})};
@@ -506,7 +585,7 @@ function xlsx(L){
 const ent=n=>n+(n===1?' entry':' entries');
 const disp=s=>{const t=s.trim().replace(/^(?:the|a|an|my|our)\s+/i,'');return t.charAt(0).toUpperCase()+t.slice(1)};
 function sumData(){
-  const A=allEntries(),tz=x=>x.e.start||x.k,mins=x=>x.e.mins||0;
+  const tz=x=>x.e.start||x.k,mins=x=>x.e.mins||0,A=allEntries().filter(periodFilter());
   const mk=l=>()=>({l,n:0,m:0,f:0,a:'',z:''});
   const add=(m,k,x,init)=>{const o=m.get(k)||init(),t=tz(x);o.n++;o.m+=mins(x);if(x.e.done)o.f++;if(!o.a||t<o.a)o.a=t;if(!o.z||t>o.z)o.z=t;m.set(k,o)};
   const act=new Map(),wk=new Map(),dy=new Map();
@@ -550,10 +629,10 @@ function xlsxSum(S){
     ...sh.map((x,i)=>f('xl/worksheets/sheet'+(i+1)+'.xml',x))]);
 }
 function dlCombined(kind){
-  const S=sumData();if(!S.n)return toast('No entries to summarise yet.');
+  const S=sumData();if(!S.n)return toast('No entries in that period yet.');
   const d=key(new Date());
-  if(kind==='xlsx')return save('day-log-combined-summary-'+d+'.xlsx',xlsxSum(S));
-  save('day-log-combined-summary-'+d+'.txt',new Blob([sumText(S)],{type:'text/plain;charset=utf-8'}));
+  if(kind==='xlsx')return save('day-log-combined-summary-'+($('#sp').value||'all')+'-'+d+'.xlsx',xlsxSum(S));
+  save('day-log-combined-summary-'+($('#sp').value||'all')+'-'+d+'.txt',new Blob([sumText(S)],{type:'text/plain;charset=utf-8'}));
 }
 
 function save(name,blob){
@@ -627,8 +706,79 @@ $('#rmp').onclick=()=>{if(!confirm('Remove the photo background?'))return;try{lo
 $('#lv').checked=localV;$('#vo').checked=voiceOn;
 $('#lv').onchange=()=>{localV=$('#lv').checked;S('dls:lv',localV?'1':'0');if(localV)autoVoice()};
 $('#vo').onchange=()=>{voiceOn=$('#vo').checked;S('dls:vo',voiceOn?'1':'0')};
-$('#wipe').onclick=()=>{if(!confirm('Erase every entry saved on this phone? This can’t be undone.'))return;dayKeys().forEach(k=>{try{localStorage.removeItem('daylog:'+k)}catch(e){}});load();say('All entries erased.')};
+$('#wipe').onclick=()=>{if(!confirm('Erase every entry saved on this phone? You can undo for a few seconds.'))return;withUndo('All entries erased.','all',()=>{dayKeys().forEach(k=>{try{localStorage.removeItem('daylog:'+k)}catch(e){}});load()})};
 syncAp();
+/* ---- v2 features: backup, timer, quick-add, search, welcome ---- */
+const DK=/^\d{4}-\d\d-\d\d$/,TM='dls:tm',nm=x=>x.trim().replace(/^(?:the|a|an|my|our)\s+/i,'');
+let tmi=null;
+function periodFilter(){const v=$('#sp').value,n=new Date();let lo='';if(v==='month')lo=key(n).slice(0,8)+'01';else if(v==='30'){const d=new Date(n);d.setDate(d.getDate()-29);lo=key(d)}else if(v==='week')lo=key(wkStart(n));return x=>!lo||(x.e.start||x.k)>=lo}
+function bkUI(n){
+  const lb=+G('dls:lb')||0,sn=+G('dls:ln')||0;
+  $('#lbk').textContent=lb?'Last backup: '+new Date(lb).toLocaleDateString(undefined,{day:'numeric',month:'short',year:'numeric'}):'No backup yet.';
+  $('#nudge').hidden=!(n>=3&&(!lb||Date.now()-lb>12096e5)&&Date.now()-sn>6048e5);
+}
+function backup(){
+  const A=allEntries();if(!A.length)return toast('Nothing to back up yet.');
+  save('day-log-backup-'+key(new Date())+'.json',new Blob([JSON.stringify({app:'daylog',version:1,exported:new Date().toISOString(),entries:A.map(x=>({day:x.k,...x.e}))})],{type:'application/json'}));
+  S('dls:lb',String(Date.now()));bkUI(A.length);
+}
+$('#bku').onclick=backup;$('#nbk').onclick=backup;
+$('#nlt').onclick=()=>{S('dls:ln',String(Date.now()));$('#nudge').hidden=true};
+$('#bkr').onclick=()=>$('#bkf').click();
+$('#bkf').onchange=e=>{
+  const f=e.target.files[0];e.target.value='';if(!f)return;
+  f.text().then(t=>{
+    let j;try{j=JSON.parse(t)}catch(x){j=null}
+    if(!j||j.app!=='daylog'||!Array.isArray(j.entries))return toast('That file isn’t a Day Log backup.');
+    const have=new Set(allEntries().map(x=>x.e.id)),by={};let add=0;
+    for(const x of j.entries){
+      if(!x||typeof x.task!=='string'||!x.task.trim()||!x.id||have.has(String(x.id))||!DK.test(x.day||''))continue;
+      have.add(String(x.id));const m=Math.round(+x.mins);
+      (by[x.day]=by[x.day]||getDay(x.day)).push({id:String(x.id),at:String(x.at||''),task:x.task.trim(),mins:m>0?m:null,icon:iconFor(x.task),start:DK.test(x.start||'')?x.start:x.day,done:DK.test(x.done||'')?x.done:null});add++;
+    }
+    const snap=snapDays(Object.keys(by));Object.keys(by).forEach(d=>setDay(d,by[d]));load();
+    const msg=add?'Restored '+add+(add===1?' entry.':' entries.'):'Nothing new to restore. Those entries are already here.';
+    add?toastAct(msg,'Undo',()=>{restoreDays(snap);load();toast('Undone.')}):toast(msg,4000);
+  }).catch(()=>toast('Couldn’t read that file.'));
+};
+const tmGet=()=>{try{return JSON.parse(G(TM))}catch(e){return null}};
+const hms=ms=>{const s=Math.floor(ms/1000);return[Math.floor(s/3600),Math.floor(s%3600/60),s%60].map(n=>String(n).padStart(2,'0')).join(':')};
+function tmUI(){
+  const s=tmGet();clearInterval(tmi);$('#tmr').hidden=!s;if(!s)return;
+  $('#tmn').textContent=s.task;const f=()=>{$('#tmt').textContent=hms(Date.now()-s.t0)};f();tmi=setInterval(f,1000);
+}
+$('#tmgo').onclick=()=>{
+  if(tmGet())return toast('A timer is already running. Stop it first.');
+  const raw=$('#box').value.trim();
+  if(!raw){$('#box').focus();say('Type or say what you’re starting, then tap the stopwatch.');return}
+  const t0=Date.now();S(TM,JSON.stringify({task:parse(raw)[0].task,t0,k:key(new Date(t0))}));
+  $('#box').value='';rs();tmUI();say('Timer started. Tap Stop when you’re done.');
+};
+function tmStop(fin){
+  const s=tmGet();if(!s)return;
+  const td=key(new Date()),mins=Math.max(1,Math.round((Date.now()-s.t0)/6e4)),id=Date.now().toString(36)+Math.random().toString(36).slice(2,6),a=getDay(s.k);
+  a.push({id,at:new Date(s.t0).toLocaleTimeString([],{hour:'numeric',minute:'2-digit'}),task:s.task,mins,icon:iconFor(s.task),start:s.k,done:fin?td:null});
+  setDay(s.k,a);try{localStorage.removeItem(TM)}catch(e){}
+  fx=id;load();toast('Logged '+fmt(mins)+' for '+s.task+'.');
+}
+$('#tms').onclick=()=>tmStop(false);$('#tmf').onclick=()=>tmStop(true);
+$('#tmx').onclick=()=>{if(!confirm('Discard this timer without saving the time?'))return;try{localStorage.removeItem(TM)}catch(e){}tmUI()};
+function qaUI(A){
+  const box=$('#qa');box.replaceChildren();
+  const lo=new Date();lo.setDate(lo.getDate()-90);const L=key(lo),m=new Map();
+  for(const x of A){if((x.e.start||x.k)<L)continue;const k=nm(x.e.task).toLowerCase(),o=m.get(k)||{l:nm(x.e.task),n:0};o.n++;m.set(k,o)}
+  const top=[...m.values()].sort((a,b)=>b.n-a.n).slice(0,6);
+  box.hidden=!top.length;
+  for(const o of top){const b=el('button',0,o.l);b.onclick=()=>{const t=$('#box');t.value=o.l+' ';rs();t.focus()};box.append(b)}
+}
+$('#q').oninput=()=>render();
+function wlShow(){
+  $('#wlt').textContent=allEntries().length?'What’s new in Day Log':'Welcome to Day Log';
+  let st=false;try{st=navigator.standalone||matchMedia('(display-mode: standalone)').matches}catch(e){}
+  $('#wlh').hidden=!!st;$('#wl').showModal();
+}
+$('#wlx').onclick=()=>$('#wl').close();$('#wlb').onclick=wlShow;
+setTimeout(()=>{if(G('dls:wl')!=='1'){S('dls:wl','1');wlShow()}},800);
 load();
 $('#off').textContent='Offline mode isn’t active yet. Open the app once with internet.';
 try{if(navigator.storage&&navigator.storage.persist)navigator.storage.persist()}catch(e){}
