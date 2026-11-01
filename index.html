@@ -34,15 +34,17 @@ function applyTheme(){
  v=dk?{a:H(58),a2:H(66),g1:H(14,s*.55),bg:H(8,s*.4),card:ph?'rgba(22,22,22,.66)':H(12,s*.32),cardo:H(12,s*.32),ink:H(95,15),mute:H(70,10),sub:H(76,s*.8),inp:H(18,s*.3),soft:H(22,s*.4),red:'#FF7A7F',gl:'rgba(255,255,255,.08)',glb:'rgba(255,255,255,.14)',sh:'0 8px 24px rgba(0,0,0,.35)'}
    :{a:H(34),a2:H(42),g1:H(91,Math.min(s,58)),bg:H(97,Math.min(s,48)),card:ph?'rgba(255,255,255,.82)':'#FFFFFF',cardo:'#FFFFFF',ink:H(10,35),mute:H(35,9),sub:H(27),inp:H(96,Math.min(s,40)),soft:H(91,Math.min(s,52)),red:'#D93A40',gl:'rgba(255,255,255,.6)',glb:'rgba(255,255,255,.9)',sh:'0 8px 24px hsla('+h+','+Math.round(s)+'%,30%,.10)'};
  for(var k in v)st.setProperty('--'+k,v[k]);
+ var AK=ls('dls:ac'),AP={green:['#0B8F5C','#14A870','#3DDC97','#2FB67C','#4EE6A6'],brown:['#8A5A3C','#A06B49','#D4A27F','#C28E6A','#E0B08E'],blue:['#2563EB','#3B7BF2','#6EA8FF','#5B93F0','#7FB2FF'],purple:['#7C3AED','#9254F0','#A78BFA','#9577F0','#B79DFB'],pink:['#DB2777','#E4408A','#F472B6','#E85BA4','#F68AC3'],graphite:['#374151','#4B5563','#D1D5DB','#B5BCC6','#E5E7EB']};if(!AP[AK])AK='green';var AQ=AP[AK];var mx=function(c,w,t){var f=function(h){return[1,3,5].map(function(i){return parseInt(h.substr(i,2),16)})},A=f(c),B=f(w);return'#'+A.map(function(v,i){return('0'+Math.round(v*t+B[i]*(1-t)).toString(16)).slice(-2)}).join('')};
+ var P=dk?{a:AQ[2],a2:AQ[3],g1:'#1A1A1C',bg:'#000000',card:ph?'rgba(26,26,28,.95)':'#1A1A1C',cardo:'#1A1A1C',ink:'#F1F4F2',mute:'#9AA39E',sub:'#B9C2BD',inp:'#27272A',soft:'#27272A',red:'#FF6B6B',gl:'rgba(255,255,255,.06)',glb:'rgba(255,255,255,.09)',sh:'none',hl:AQ[4],hero:mx(AQ[2],'#1A1A1C',.26)}:{a:AQ[0],a2:AQ[1],g1:'#EEF2F0',bg:'#F5F6F5',card:ph?'rgba(255,255,255,.95)':'#FFFFFF',cardo:'#FFFFFF',ink:'#0E1512',mute:'#6A7570',sub:'#3C4743',inp:'#F0F2F1',soft:'#EDF0EE',red:'#D93A40',gl:'rgba(255,255,255,.6)',glb:'rgba(14,21,18,.08)',sh:'none',hl:AQ[4],hero:mx(AQ[0],'#000000',.42)};for(var k2 in P)st.setProperty('--'+k2,P[k2]);
  st.setProperty('--h',h);st.setProperty('--s',Math.round(s)+'%');st.colorScheme=dk?'dark':'light';R.classList.toggle('dk',dk);R.classList.toggle('blur',ls('dls:blur')==='1');R.classList.toggle('lite',isLite());R.dataset.ts=ls('dls:ts')||'';
  var rgb=hsl2rgb(h,s,dk?58:34).map(function(x){x/=255;return x<=.03928?x/12.92:Math.pow((x+.055)/1.055,2.4)}),L=.2126*rgb[0]+.7152*rgb[1]+.0722*rgb[2];
- st.setProperty('--on',L<.179?'#ffffff':'#0b0b0b');
+ st.setProperty('--on',dk?'#06130D':'#ffffff');
  if(!d){R.classList.remove('ph','pd','pl')}
  else{var c2=/^#[0-9a-f]{6}$/i.test((p&&p.c)||'')?p.c:'#333333',o=parseFloat(ls('dls:bgo')),dm=parseFloat(ls('dls:bgd'));o=isFinite(o)?Math.min(1,Math.max(.1,o)):1;dm=isFinite(dm)?Math.min(.8,Math.max(0,dm)):.25;
   var y=(parseInt(c2.substr(1,2),16)*.299+parseInt(c2.substr(3,2),16)*.587+parseInt(c2.substr(5,2),16)*.114)/255*(1-dm);
   st.setProperty('--bgc',c2);st.setProperty('--bgo',o);st.setProperty('--bgd',dm);st.setProperty('--bgs',ls('dls:bgf')==='fit'?'contain':'cover');
   R.classList.add('ph');R.classList.toggle('pd',y<.5);R.classList.toggle('pl',y>=.5)}
- var mt=document.querySelector('meta[name=theme-color]');if(mt)mt.content=hx(hsl2rgb(h,dk?s*.4:Math.min(s,58),dk?8:91));
+ var mt=document.querySelector('meta[name=theme-color]');if(mt)mt.content=dk?'#000000':'#F5F6F5';
 }
 document.documentElement.classList.add('dbl');try{if(localStorage.getItem('dls:pin'))document.documentElement.classList.add('locked');if(localStorage.getItem('dls:sbc')==='1')document.documentElement.classList.add('sbc')}catch(e){}
 applyTheme();
@@ -445,6 +447,101 @@ html.lite .log li{content-visibility:auto;contain-intrinsic-size:auto 66px}
 html.lite #mic.on{background:var(--red);box-shadow:0 0 0 6px color-mix(in srgb,var(--red) 40%,transparent)!important}
 @media (prefers-reduced-motion:reduce){#mic.on{background:var(--red);box-shadow:0 0 0 6px color-mix(in srgb,var(--red) 40%,transparent)}}
 </style>
+<style id="v4">:root{--r:16px;--font:Inter,-apple-system,BlinkMacSystemFont,"SF Pro Text",Roboto,system-ui,sans-serif;--bd:var(--glb);--hero:#0E1512;--heroi:#F2F5F3}
+html.dk{--hero:#1B231F}
+body{font-family:var(--font);font-size:16px;letter-spacing:-.005em}
+body::before{display:none!important}
+html:not(.ph) body{background:var(--bg)}
+h1{font-size:28px;letter-spacing:-.03em}
+h2{font-size:12px;font-weight:600;color:var(--mute);text-transform:uppercase;letter-spacing:.08em}
+.card{background:var(--card);border:1px solid var(--bd);border-radius:var(--r);box-shadow:none;-webkit-backdrop-filter:none;backdrop-filter:none}
+.sum{background:var(--hero)!important;color:var(--heroi);border:0;border-radius:20px;padding:20px}
+.sum::after{content:none}
+.sum .lbl,.sum .total small,.sum .leg em,.sum .gt{color:rgba(255,255,255,.62)}
+.sum .total{color:var(--heroi);font-size:42px;font-weight:700;letter-spacing:-.04em;font-variant-numeric:tabular-nums}
+.sum .gt b,.sum .leg span{color:var(--heroi)}
+.sum .seg{background:rgba(255,255,255,.12);height:8px}
+.sum .ring .rbg{stroke:rgba(255,255,255,.16)}
+.sum .ring .rfg{stroke:var(--hl)}
+.sum .rtx{fill:var(--heroi)}
+.log li+li::before{height:1px;background:var(--bd);left:70px}
+html .log li .tile,html .log li .tile.gi{background:var(--soft)!important;border:0!important;box-shadow:none!important;color:var(--sub)!important;border-radius:50%!important;width:42px;height:42px}
+.gi::after{display:none!important}
+.sgrp .acch i.gi,.lrow .gi{background:var(--soft)!important;color:var(--sub)!important;border:0!important;box-shadow:none!important;border-radius:12px!important}
+.dur{font-variant-numeric:tabular-nums;font-weight:600;color:var(--ink)}
+.dock{background:var(--cardo);border:0;border-top:1px solid var(--bd);border-radius:0;box-shadow:none}
+.field{background:var(--inp);border:0;border-radius:24px;box-shadow:none;padding:3px 4px 3px 16px}
+#go{width:40px;height:40px;margin:0 0 1px;background:var(--a)!important;color:var(--on);box-shadow:none}
+#tmgo{width:40px;height:40px;margin:0 0 1px;border:0;color:var(--mute)}
+.bdp{background:var(--card);color:var(--sub)}
+.chips button{background:var(--card);border:1px solid var(--bd);box-shadow:none;min-height:38px;font-weight:500}
+.chips button.on{background:var(--ink);color:var(--bg);border-color:var(--ink)}
+.pri,.dl button,.bt .pri{background:var(--a)!important;color:var(--on);border-radius:12px;box-shadow:none}
+.mini{background:var(--soft);border:0;border-radius:12px;color:var(--ink)}
+.in,.bdr input{background:var(--inp);border:0;border-radius:12px}
+.seg2{border-radius:12px;background:var(--inp)}
+.seg2 button{border-radius:10px}
+.seg2 button.on{background:var(--card);color:var(--ink);box-shadow:0 1px 2px rgba(0,0,0,.12)}
+.seg2 button.on i{color:var(--a)}
+.bnav{background:var(--cardo);border:1px solid var(--bd);box-shadow:none!important}
+.bnav [data-v]::after{display:none}
+.bnav .on{color:var(--a)}
+#toast{border-radius:12px;background:var(--ink);color:var(--bg)}
+dialog{background:var(--cardo);border:0;border-radius:20px;box-shadow:none}
+#sft .mini{display:none}
+.wipe{color:var(--red)}
+@media (max-width:640px){dialog{width:100%;max-width:100%;margin:auto 0 0;border-radius:20px 20px 0 0;max-height:88vh;padding:20px 16px calc(20px + env(safe-area-inset-bottom,0px))}}
+
+.sum .total small{letter-spacing:0;font-weight:400;font-size:14px}
+@media (max-width:767px){.bnav{border-radius:0;border-width:1px 0 0}}
+.sum{margin-bottom:12px}
+.sgrp .acch .act{flex-direction:column;align-items:flex-start;text-align:left}.sgrp .acch small{text-align:left;white-space:normal}
+.sws{display:flex;gap:14px;margin:6px 0 16px}.sws button{width:38px;height:38px;border-radius:50%;background:var(--c);box-shadow:inset 0 0 0 1px rgba(0,0,0,.12)}.sws button.on{box-shadow:0 0 0 2px var(--card),0 0 0 4px var(--c)}
+
+/* v5 notes-style layout */
+:root,html.sbc{--sbw:0px!important;--sbo:0px!important}
+body{padding-top:calc(64px + env(safe-area-inset-top,0px))!important;padding-left:16px!important;padding-bottom:calc(40px + env(safe-area-inset-bottom,0px))!important}
+body[data-v=day]{padding-bottom:calc(190px + env(safe-area-inset-bottom,0px))!important}
+html{padding-top:0!important}
+.bnav{position:fixed!important;top:0!important;left:0!important;right:0!important;bottom:auto!important;width:auto!important;height:auto!important;flex-direction:row!important;justify-content:space-between!important;align-items:center!important;gap:12px;padding:calc(10px + env(safe-area-inset-top,0px)) 16px 8px!important;background:var(--bg)!important;border:0!important;border-radius:0!important;z-index:30}
+html.ph .bnav{background:transparent!important}
+.bnav .rb{flex:none!important;width:44px!important;height:44px!important;min-height:0;padding:0!important;border-radius:50%!important;background:var(--card);border:1px solid var(--bd);display:grid;place-items:center;color:var(--ink)}
+.bnav .rb .ic{width:22px;height:22px;display:block}
+.bnav .rb .lb,.bnav .rb::before,.bnav .rb::after{display:none!important}
+.bnav .rb.on{color:var(--a)}
+.rb i{width:22px;height:22px;display:block;font-style:normal}
+.pill{display:flex;flex:0 1 300px;margin:0 auto;background:var(--card);border:1px solid var(--bd);border-radius:999px;padding:4px;gap:2px}
+.bnav .pill [data-v]{flex:1!important;height:36px!important;padding:0 10px!important;border-radius:999px!important;flex-direction:row!important;justify-content:center!important;font-size:15px;font-weight:600;color:var(--mute);gap:0}
+.bnav .pill [data-v].on{background:var(--soft);color:var(--ink)}
+.pill .ic,.pill [data-v]::before,.pill [data-v]::after{display:none!important}
+.pill .lb{display:block!important;max-width:none}
+#xpb{display:none}
+h1{font-size:34px;letter-spacing:-.03em;max-width:none}
+h2{font-size:21px;font-weight:600;text-transform:none;letter-spacing:-.01em;color:var(--ink);margin:22px 4px 10px}
+html.ph .sgrp{overflow:hidden}
+html .log li .tile{display:none!important}
+.log li{padding:10px 6px 10px 16px;min-height:60px}
+.log li+li::before{left:16px;right:16px}
+.main div{font-size:17px;font-weight:600}
+.main small{font-size:13px;color:var(--mute)}
+.tgr,.tgr{padding-left:16px}
+.dock{left:0!important;right:0!important;bottom:0!important;padding:10px 16px calc(14px + env(safe-area-inset-bottom,0px))!important;background:linear-gradient(to top,var(--bg) 72%,transparent)!important;border:0!important}
+html.ph .dock{background:linear-gradient(to top,rgba(0,0,0,.4),transparent)!important}
+.ctl{gap:10px;align-items:flex-end}
+.field{background:var(--card);border:1px solid var(--bd);min-height:48px}
+#go,#tmgo{flex:none;width:48px;height:48px;margin:0;border-radius:50%}
+#tmgo{background:var(--card);border:1px solid var(--bd);color:var(--ink)}
+#go svg,#tmgo svg{width:20px;height:20px}
+body[data-v=day] #toast{bottom:calc(150px + env(safe-area-inset-bottom,0px))!important}
+#toast{left:50%!important}
+.more{display:grid;place-items:center;padding:12px}
+.bnav{gap:8px!important;padding-left:12px!important;padding-right:12px!important}
+.pill{flex:1 1 0!important;min-width:0;margin:0!important}
+.bnav .pill [data-v]{padding:0 4px!important;font-size:14px;min-width:0}
+.bnav .pill .lb{overflow:visible;text-overflow:clip}
+#all .acts{display:none}
+body{padding-top:calc(76px + env(safe-area-inset-top,0px))!important}
+</style>
 </head>
 <body>
 <div id="bgp" aria-hidden="true"><i></i></div>
@@ -461,13 +558,7 @@ html.lite #mic.on{background:var(--red);box-shadow:0 0 0 6px color-mix(in srgb,v
     <button class="nav" id="prev" aria-label="Previous"><svg viewBox="0 0 12 20" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"><path d="M10 2 2 10l8 8"/></svg></button>
     <button class="nav" id="next" aria-label="Next"><svg viewBox="0 0 12 20" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"><path d="M2 2l8 8-8 8"/></svg></button>
   </div>
-  <nav class="bnav" aria-label="Primary">
-    <div class="bn-head"><img src="icon-192.png" alt="" width="32" height="32"><span class="bn-name">Tracker</span><button class="bn-col" id="bncol" type="button" aria-label="Collapse sidebar" aria-expanded="true"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M15 5l-7 7 7 7"/></svg></button></div>
-    <button type="button" data-v="day" data-tip="Day"><span class="ic"><svg class="o" viewBox="0 0 24 24" aria-hidden="true"><path d="M12 8a4 4 0 1 0 0 8 4 4 0 0 0 0-8zM12 2v2M12 20v2M2 12h2M20 12h2M5 5l1.5 1.5M17.5 17.5L19 19M5 19l1.5-1.5M17.5 6.5L19 5"/></svg><svg class="f" viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="4.6" fill="currentColor"/><path d="M12 2v2M12 20v2M2 12h2M20 12h2M5 5l1.5 1.5M17.5 17.5L19 19M5 19l1.5-1.5M17.5 6.5L19 5"/></svg></span><span class="lb">Day</span></button>
-    <button type="button" data-v="week" data-tip="Week"><span class="ic"><svg class="o" viewBox="0 0 24 24" aria-hidden="true"><path d="M4 5h16v15H4zM4 10h16M9 10v10M15 10v10"/></svg><svg class="f" viewBox="0 0 24 24" aria-hidden="true"><path d="M4 5h16v15H4z" fill="currentColor"/><path d="M4 10h16M9 10v10M15 10v10" style="stroke:var(--nbg)"/></svg></span><span class="lb">Week</span></button>
-    <button type="button" data-v="list" data-tip="List"><span class="ic"><svg class="o" viewBox="0 0 24 24" aria-hidden="true"><path d="M9 6h11M9 12h11M9 18h11M4 6h.01M4 12h.01M4 18h.01"/></svg><svg class="f" viewBox="0 0 24 24" aria-hidden="true"><path d="M9 6h11M9 12h11M9 18h11M4 6h.01M4 12h.01M4 18h.01"/></svg></span><span class="lb">List</span></button>
-    <button type="button" data-v="set" data-tip="Settings"><span class="ic"><svg class="o" viewBox="0 0 24 24" aria-hidden="true"><path d="M4 8h9M17 8h3M4 16h3M11 16h9M15 5v6M9 13v6"/></svg><svg class="f" viewBox="0 0 24 24" aria-hidden="true"><path d="M4 8h9M17 8h3M4 16h3M11 16h9M15 5v6M9 13v6"/></svg></span><span class="lb">Settings</span></button>
-  </nav>
+  <nav class="bnav" aria-label="Primary"><button type="button" aria-label="Settings" class="rb" data-v="set" data-tip="Settings"><span class="ic"><svg class="o" viewBox="0 0 24 24" aria-hidden="true"><path d="M4 8h9M17 8h3M4 16h3M11 16h9M15 5v6M9 13v6"/></svg><svg class="f" viewBox="0 0 24 24" aria-hidden="true"><path d="M4 8h9M17 8h3M4 16h3M11 16h9M15 5v6M9 13v6"/></svg></span><span class="lb">Settings</span></button><div class="pill"><button type="button" data-v="day" data-tip="Day"><span class="ic"><svg class="o" viewBox="0 0 24 24" aria-hidden="true"><path d="M12 8a4 4 0 1 0 0 8 4 4 0 0 0 0-8zM12 2v2M12 20v2M2 12h2M20 12h2M5 5l1.5 1.5M17.5 17.5L19 19M5 19l1.5-1.5M17.5 6.5L19 5"/></svg><svg class="f" viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="4.6" fill="currentColor"/><path d="M12 2v2M12 20v2M2 12h2M20 12h2M5 5l1.5 1.5M17.5 17.5L19 19M5 19l1.5-1.5M17.5 6.5L19 5"/></svg></span><span class="lb">Today</span></button><button type="button" data-v="week" data-tip="Week"><span class="ic"><svg class="o" viewBox="0 0 24 24" aria-hidden="true"><path d="M4 5h16v15H4zM4 10h16M9 10v10M15 10v10"/></svg><svg class="f" viewBox="0 0 24 24" aria-hidden="true"><path d="M4 5h16v15H4z" fill="currentColor"/><path d="M4 10h16M9 10v10M15 10v10" style="stroke:var(--nbg)"/></svg></span><span class="lb">Insights</span></button><button type="button" data-v="list" data-tip="List"><span class="ic"><svg class="o" viewBox="0 0 24 24" aria-hidden="true"><path d="M9 6h11M9 12h11M9 18h11M4 6h.01M4 12h.01M4 18h.01"/></svg><svg class="f" viewBox="0 0 24 24" aria-hidden="true"><path d="M9 6h11M9 12h11M9 18h11M4 6h.01M4 12h.01M4 18h.01"/></svg></span><span class="lb">Activity</span></button></div><button type="button" class="rb" id="xp2" aria-label="Export"><i data-i="dl"></i></button></nav>
   <div class="hi" id="hi"></div>
   <h1 id="title"></h1>
   <div class="sub" id="date"></div>
@@ -489,7 +580,7 @@ html.lite #mic.on{background:var(--red);box-shadow:0 0 0 6px color-mix(in srgb,v
     <div class="lrow"><input type="search" id="q" class="in" placeholder="Search your entries" aria-label="Search your entries"><button class="gi" id="xpb" aria-label="Export or summarise" type="button"><i data-i="dl"></i></button></div>
     <div class="chips" id="fl"><button data-f="all" data-l="All">All</button><button data-f="open" data-l="In progress">In progress</button><button data-f="done" data-l="Finished">Finished</button></div>
     <div class="chips" id="tf" hidden></div>
-    <ul class="card log" id="all"></ul>
+    <div id="all"></div>
   </div>
   <div data-s="set">
     <section class="card acc" data-acc="ap"><button class="acch" type="button" aria-expanded="false"><i class="gi" data-i="palette"></i><span class="act"><b>Appearance</b><small id="as-ap"></small></span><i class="chev" data-i="chev"></i></button><div class="accb"><div><div class="accc">
@@ -497,28 +588,20 @@ html.lite #mic.on{background:var(--red);box-shadow:0 0 0 6px color-mix(in srgb,v
       <div class="seg2" id="md"><button data-m="auto"><i data-i="auto"></i><span>Auto</span></button><button data-m="light"><i data-i="sun"></i><span>Light</span></button><button data-m="dark"><i data-i="moon"></i><span>Dark</span></button></div>
       <div class="lbl">Text size</div>
       <div class="seg2" id="ts"><button type="button" data-t="">Normal</button><button type="button" data-t="l">Large</button><button type="button" data-t="xl">Larger</button></div>
-      <div class="lbl">Accent colour</div>
-      <div class="seg2" id="sw"><button type="button" data-ac="brown">Auto</button><button type="button" data-ac="custom"><i data-i="dice"></i><span>Randomise</span></button></div>
-      <div class="lbl">Personalisation</div>
-      <div class="bgrow"><div class="bgth" id="bgth" hidden></div><button class="pri" id="pick" type="button"><i data-i="img"></i><span>Choose a photo</span></button></div>
+      <div class="lbl">Accent colour</div> <div class="sws" id="sws"><button type="button" data-k="green" aria-label="Green" style="--c:#0B8F5C"></button><button type="button" data-k="brown" aria-label="Brown" style="--c:#8A5A3C"></button><button type="button" data-k="blue" aria-label="Blue" style="--c:#2563EB"></button><button type="button" data-k="purple" aria-label="Purple" style="--c:#7C3AED"></button><button type="button" data-k="pink" aria-label="Pink" style="--c:#DB2777"></button><button type="button" data-k="graphite" aria-label="Graphite" style="--c:#374151"></button></div> <div class="lbl">Wallpaper</div>
+      <div class="bgrow"><div class="bgth" id="bgth" hidden></div><button class="pri" id="pick" type="button"><i data-i="img"></i><span>Choose wallpaper</span></button></div>
       <p class="lbl" id="bgnote">Pick a picture from your phone. It is shrunk and kept only on this phone, never sent anywhere.</p>
       <div id="pc" hidden>
-        <label class="opt"><input type="checkbox" id="bgt"><span>Show the photo</span></label>
-        <div class="lbl">Photo visibility <b id="oO"></b></div><input type="range" id="sO" min="10" max="100" step="1" aria-label="Photo visibility">
-        <div class="lbl">Photo darkness <b id="oD"></b></div><input type="range" id="sD" min="0" max="80" step="1" aria-label="Photo darkness">
+        <label class="opt"><input type="checkbox" id="bgt"><span>Show wallpaper</span></label>
+        <div class="lbl">Wallpaper visibility <b id="oO"></b></div><input type="range" id="sO" min="10" max="100" step="1" aria-label="Wallpaper visibility">
+        <div class="lbl">Dim wallpaper <b id="oD"></b></div><input type="range" id="sD" min="0" max="80" step="1" aria-label="Dim wallpaper">
         <div class="seg2" id="fit"><button data-f="fill"><i data-i="fill"></i><span>Fill screen</span></button><button data-f="fit"><i data-i="fit"></i><span>Fit whole photo</span></button></div>
         <button class="wipe" id="rmp" type="button">Remove photo</button>
       </div>
-      <label class="opt"><input type="checkbox" id="blr"><span>Frosted glass blur<br><small class="lbl">Prettier, but uses more battery. Leave off for the fastest app.</small></span></label>
-      <label class="opt"><input type="checkbox" id="lite"><span>Lite mode<br><small class="lbl">For older or slower phones. Turns off animations and shadows and shows fewer entries at a time. Switches on by itself on low-memory phones.</small></span></label></div></div></div></section>
+      </div></div></div></section>
     <section class="card acc" data-acc="go"><button class="acch" type="button" aria-expanded="false"><i class="gi" data-i="target"></i><span class="act"><b>Weekly goal</b><small id="as-go"></small></span><i class="chev" data-i="chev"></i></button><div class="accb"><div><div class="accc">
       <p>How many hours do you want to log each week? A progress ring shows on the Day and Week tabs.</p>
       <label class="fl">Hours per week (0 turns it off)<input id="gin" class="in" type="number" min="0" max="168" step="0.5" inputmode="decimal"></label></div></div></div></section>
-    <section class="card acc" data-acc="vo"><button class="acch" type="button" aria-expanded="false"><i class="gi" data-i="mic"></i><span class="act"><b>Voice</b><small id="as-vo"></small></span><i class="chev" data-i="chev"></i></button><div class="accb"><div><div class="accc">
-      <label class="opt"><input type="checkbox" id="lv"><span>Keep voice on this device. Private, and works offline where your browser supports it.</span></label>
-      <label class="opt"><input type="checkbox" id="vo"><span>If on-device voice isn’t available, allow online voice (Apple or Google may process the audio)</span></label>
-      <p class="lbl" id="off"></p>
-      <p class="lbl" id="vs"></p><button class="mini" id="vdl" hidden><i data-i="dl"></i>Download offline voice now</button></div></div></div></section>
     <section class="card acc" data-acc="pv"><button class="acch" type="button" aria-expanded="false"><i class="gi" data-i="lock"></i><span class="act"><b>Privacy</b><small id="as-pv"></small></span><i class="chev" data-i="chev"></i></button><div class="accb"><div><div class="accc">
       <p>Entries stay on this phone. This page can’t send anything over the internet.</p>
       <p class="lbl" id="pns"></p>
@@ -536,21 +619,16 @@ html.lite #mic.on{background:var(--red);box-shadow:0 0 0 6px color-mix(in srgb,v
       <label class="fl">What should we call you?<input id="nm" class="in" maxlength="24" placeholder="Your first name" autocomplete="given-name"></label></div></div></div></section>
     <section class="card acc" data-acc="hp"><button class="acch" type="button" aria-expanded="false"><i class="gi" data-i="help"></i><span class="act"><b>Help</b><small id="as-hp"></small></span><i class="chev" data-i="chev"></i></button><div class="accb"><div><div class="accc">
       <p class="lbl" id="offs"></p><button class="mini" id="inst" type="button" hidden><i data-i="dl"></i>Install app</button>
-      <button class="mini" id="tur" type="button">Replay the tutorial</button> <button class="mini" id="wlb">Show the welcome tips again</button></div></div></div></section>
+      </div></div></div></section>
   </div>
 </main>
 <div class="dock" data-s="day"><div>
   <div class="chips qa" id="qa" hidden></div>
-  <p id="say" aria-live="polite"></p>
-  <div id="viz" aria-hidden="true" hidden><i></i><i></i><i></i><i></i><i></i><i></i><i></i></div>
   <div class="ctl">
-    <button id="mic" aria-label="Start talking"><svg class="mc" viewBox="0 0 24 24" fill="currentColor"><path d="M12 14.5a3.5 3.5 0 0 0 3.5-3.5V6a3.5 3.5 0 0 0-7 0v5a3.5 3.5 0 0 0 3.5 3.5Z"/><path d="M5.5 10.5a1 1 0 0 1 2 0v.5a4.5 4.5 0 0 0 9 0v-.5a1 1 0 0 1 2 0v.5a6.5 6.5 0 0 1-5.5 6.42V20h2a1 1 0 0 1 0 2h-6a1 1 0 0 1 0-2h2v-2.58A6.5 6.5 0 0 1 5.5 11v-.5Z"/></svg><svg class="st" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><rect x="6" y="6" width="12" height="12" rx="2.5"/></svg></button>
     <div class="field">
       <textarea id="box" placeholder="Log activity" aria-label="Describe an activity"></textarea>
       <label class="bdp" title="When did it begin?"><i data-i="cal"></i><span id="bdl">Today</span><input type="date" id="bd" aria-label="Begin date"></label>
-      <button id="tmgo" aria-label="Start a timer"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="13.5" r="7.5"/><path d="M12 9.5v4l2.5 1.5M9.5 3h5M12 3v3"/></svg></button>
-      <button id="go" aria-label="Log it"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><path d="M12 20V5M5.5 11.5 12 5l6.5 6.5"/></svg></button>
-    </div>
+      </div><button id="tmgo" aria-label="Start a timer"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="13.5" r="7.5"/><path d="M12 9.5v4l2.5 1.5M9.5 3h5M12 3v3"/></svg></button><button id="go" aria-label="Log it"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><path d="M12 20V5M5.5 11.5 12 5l6.5 6.5"/></svg></button>
   </div>
 </div></div>
 <input type="file" id="ph" accept="image/*" hidden><div id="toast" role="status"></div>
@@ -570,21 +648,6 @@ html.lite #mic.on{background:var(--red);box-shadow:0 0 0 6px color-mix(in srgb,v
   <div class="bt"><span></span><button id="xpx">Close</button></div>
 </dialog>
 <dialog id="fv"><div class="dt" id="fvt"></div><label class="fl">Usual time in minutes (leave empty for none)<input id="fvm" class="in" type="number" min="1" max="1440" inputmode="numeric"></label><p class="lbl" id="fvh"></p><div class="bt"><button id="fvu" class="mini" type="button">Unpin</button><span></span><button id="fvc" class="mini" type="button">Cancel</button><button id="fvs" class="pri" type="button">Save</button></div></dialog>
-<dialog id="wl">
-  <div class="dt" id="wlt">Welcome to Tracker</div>
-  <ul class="tips">
-    <li><b>Talk or type.</b> Tap the mic, or type. Say several things at once: “an hour on the report, then 30 minutes on email.”</li>
-    <li><b>Tap an entry to edit it.</b> Tap its circle to mark it finished.</li>
-    <li><b>Use the stopwatch</b> next to the send arrow to time a task live. Stop or Finish it when you’re done.</li>
-    <li><b>Find things fast</b> with the quick buttons above the keyboard and the search box in the List tab.</li>
-    <li><b>Back up now and then.</b> Your entries live only on this phone. Settings has a backup you can restore.</li>
-    <li><b>Changed your mind?</b> After you log, edit, finish or delete something, tap <b>Undo</b> in the message that pops up.</li>
-    <li><b>Do it again.</b> Open an entry and tap “Log again today” to repeat it. Log every day to build a streak.</li>
-    <li><b>New:</b> add notes and #tags to entries, set a weekly goal, lock the app with a PIN, and save a weekly report as an image.</li>
-    <li id="wlh"><b>Install it.</b> In Safari, tap Share, then Add to Home Screen.</li>
-  </ul>
-  <div class="bt"><span></span><button id="wlx" class="pri">Got it</button></div>
-</dialog>
 <dialog id="pd">
   <div class="dt" id="pdt">Set a PIN</div>
   <label class="fl" id="pl0">Current PIN<input id="pi0" class="in" type="password" inputmode="numeric" autocomplete="off" maxlength="6"></label>
@@ -619,17 +682,16 @@ let DBV=0;
  Storage.prototype.setItem=function(k,v){if(dk(k))DBV++;return si.call(this,k,v)};
  Storage.prototype.removeItem=function(k){if(dk(k))DBV++;return ri.call(this,k)};
  Storage.prototype.clear=function(){DBV++;return cl.call(this)}}
-const $=s=>document.querySelector(s),pad=n=>String(n).padStart(2,'0');
+const _N=Object.assign(document.createElement('div'),{showModal(){},close(){}}),$=s=>document.querySelector(s)||_N,pad=n=>String(n).padStart(2,'0');
 const key=d=>d.getFullYear()+'-'+pad(d.getMonth()+1)+'-'+pad(d.getDate());
 const fmt=m=>{m=Math.round(m);const h=Math.floor(m/60),r=m%60;return h?(r?h+'h '+r+'m':h+'h'):r+'m'};
 const el=(t,c,x)=>{const e=document.createElement(t);if(c)e.className=c;if(x!=null)e.textContent=x;return e};
-let sayT=0;const say=t=>{clearTimeout(sayT);$('#say').textContent=t;if(t)sayT=setTimeout(()=>{$('#say').textContent=''},4500)};
+let sayT=0;const say=t=>{if(t)toast(t)};
 const greet=()=>{const h=new Date().getHours(),n=(G('dls:nm')||'').trim();return (h<12?'Good morning':h<18?'Good afternoon':'Good evening')+(n?', '+n:'')};
 const FDC=new Map(),FDa=new Intl.DateTimeFormat(undefined,{month:'short',day:'numeric'}),FDb=new Intl.DateTimeFormat(undefined,{month:'short',day:'numeric',year:'numeric'});
 const fd=s=>{if(!s)return'';let r=FDC.get(s);if(r)return r;const[y,m,d]=s.split('-'),n=new Date(y,m-1,d);r=(+y===new Date().getFullYear()?FDa:FDb).format(n);FDC.set(s,r);return r};
 const G=k=>{try{return localStorage.getItem(k)}catch(e){return null}},S=(k,v)=>{try{localStorage.setItem(k,v)}catch(e){}};
-const colorFor=s=>{let x=0;for(const c of s.toLowerCase())x=(x*31+c.charCodeAt(0))>>>0;const L=TH.dk?[62,70,78,56,66]:[30,42,54,36,48];return`hsl(${(TH.h+[-12,0,12][x%3]+360)%360},${Math.round(TH.s*[1.1,.95,1][x%3])}%,${L[(x>>>3)%5]}%)`};
-const colorForOld=s=>{let x=0;for(const c of s.toLowerCase())x=(x*31+c.charCodeAt(0))>>>0;return`hsl(${(TH.h+[-22,0,22][x%3]+360)%360},${Math.round(TH.s)}%,${TH.dk?56+(x>>3)%3*6:32+(x>>3)%3*7}%)`};
+const colorFor=s=>{let x=0;for(const c of s.toLowerCase())x=(x*31+c.charCodeAt(0))>>>0;const b=(getComputedStyle(document.documentElement).getPropertyValue('--hl')||'#4EE6A6').trim(),m=(c,w,t)=>{const f=h=>[1,3,5].map(i=>parseInt(h.substr(i,2),16));const A=f(c),B=f(w);return'#'+A.map((v,i)=>('0'+Math.round(v*t+B[i]*(1-t)).toString(16)).slice(-2)).join('')};const L=[b,m(b,'#ffffff',.8),m(b,'#000000',.7),m(b,'#ffffff',.6),m(b,'#8a9690',.5),m(b,'#000000',.85)];return L[x%6]};const colorForOld=s=>{let x=0;for(const c of s.toLowerCase())x=(x*31+c.charCodeAt(0))>>>0;return`hsl(${(TH.h+[-22,0,22][x%3]+360)%360},${Math.round(TH.s)}%,${TH.dk?56+(x>>3)%3*6:32+(x>>3)%3*7}%)`};
 const EM=[[/meet|call|zoom|sync/,'call'],[/mail|inbox/,'mail'],[/report|write|draft|doc/,'doc'],[/lunch|eat|coffee|break/,'cup'],[/code|debug|build|develop/,'code'],[/review|check/,'find'],[/plan|strategy|schedule/,'cal'],[/travel|drive|commute/,'car']];
 const iconFor=s=>{const m=EM.find(([r])=>r.test(s.toLowerCase()));return m?m[1]:'pen'};
 const IC={call:'M5 4h4l2 5-2.5 1.5a11 11 0 0 0 5 5L15 13l5 2v4a2 2 0 0 1-2 2A15 15 0 0 1 3 6a2 2 0 0 1 2-2z',mail:'M3 6h18v12H3zM3 7l9 7 9-7',doc:'M6 3h9l4 4v14H6zM14 3v5h5M9 13h7M9 17h5',cup:'M5 8h11v6a4 4 0 0 1-4 4H9a4 4 0 0 1-4-4zM16 9h2a2 2 0 0 1 0 4h-2M8 3v2M12 3v2',code:'M9 8l-5 4 5 4M15 8l5 4-5 4M13 5l-2 14',find:'M11 4a7 7 0 1 0 0 14 7 7 0 0 0 0-14zM16.5 16.5L21 21',cal:'M4 6h16v14H4zM4 10h16M8 3v4M16 3v4',car:'M5 16v-5l2-5h10l2 5v5zM3 16h18M7.5 13h.01M16.5 13h.01',pen:'M4 20l1-4L16 5l3 3L8 19zM14 7l3 3',sun:'M12 8a4 4 0 1 0 0 8 4 4 0 0 0 0-8zM12 2v2M12 20v2M2 12h2M20 12h2M5 5l1.5 1.5M17.5 17.5L19 19M5 19l1.5-1.5M17.5 6.5L19 5',moon:'M20 14.5A8 8 0 0 1 9.5 4 8 8 0 1 0 20 14.5z',week:'M4 5h16v15H4zM4 10h16M9 10v10M15 10v10',list:'M9 6h11M9 12h11M9 18h11M4 6h.01M4 12h.01M4 18h.01',sliders:'M4 8h9M17 8h3M4 16h3M11 16h9M15 5v6M9 13v6',dl:'M12 4v11M7 11l5 5 5-5M5 20h14',img:'M4 5h16v14H4zM4 16l5-5 4 4 3-3 4 4M9 9h.01',fill:'M4 8V4h4M20 8V4h-4M4 16v4h4M20 16v4h-4',fit:'M8 4v4H4M16 4v4h4M8 20v-4H4M16 20v-4h4',plus:'M12 5v14M5 12h14'};
@@ -768,9 +830,8 @@ function render(a){
      if(tc.size){const mk=(g,l)=>{const b=el('button',g===tflt?'on':'',l);b.onclick=()=>{tflt=g;render(true)};tf.append(b)};mk('','All tags');for(const[g,n]of[...tc.entries()].sort((a,b)=>b[1]-a[1]))mk(g,'#'+g+' '+n)}}
     const fk=flt+'|'+qv+'|'+tflt;if(fk!==lfk||lmode!=='list'){lim=PG;lfk=fk}
     u.replaceChildren();
-    if(!F.length)u.append(el('li','empty',A.length?(qv?'No entries match your search.':'No entries in this filter.'):'No entries yet. Log something from the Day tab.'));
-    let i=0;const page=n=>{const fr=document.createDocumentFragment(),end=Math.min(F.length,i+n);for(;i<end;i++)fr.append(row(F[i].e,F[i].k,true));
-      if(i<F.length){const li=el('li','more'),b=el('button','mini','Show more ('+(F.length-i)+' left)');b.onclick=()=>{li.remove();lim+=PG;page(PG)};li.append(b);fr.append(li)}u.append(fr)};
+    if(!F.length)u.append(el('div','empty',A.length?(qv?'No entries match your search.':'No entries in this filter.'):'No entries yet. Log something from the Day tab.'));
+    let i=0,gl=null,gk='';const grp=d=>{const t=new Date();t.setHours(0,0,0,0);const dd=new Date(d+'T00:00:00'),df=Math.round((t-dd)/864e5);if(df<=0)return'Today';if(df<=7)return'Previous 7 days';if(df<=30)return'Previous 30 days';return dd.toLocaleDateString(undefined,dd.getFullYear()===t.getFullYear()?{month:'long'}:{month:'long',year:'numeric'})};const page=n=>{const end=Math.min(F.length,i+n);for(;i<end;i++){const g=grp(F[i].e.start||F[i].k);if(g!==gk||!gl){gk=g;gl=el('ul','card log');u.append(el('h2',0,g),gl)}gl.append(row(F[i].e,F[i].k,true))}if(i<F.length){const w=el('div','more'),b=el('button','mini','Show more ('+(F.length-i)+' left)');b.onclick=()=>{w.remove();lim+=PG;page(PG)};w.append(b);u.append(w)}};
     page(lim);
   }else{const sc=document.querySelector('[data-s=set]'),oa=sc.classList.contains('ssub')&&sc.querySelector('.acc.open b');$('#title').textContent=oa?oa.textContent:'Settings';$('#date').textContent=oa?'':'Make it yours and keep it private'}
   lmode=mode;fx=null;try{if(mode==='day'){const A=allEntries();qaUI(A);bkUI(A.length)}else if(mode==='set')bkUI(allEntries().length);tmUI();if(mode==='day'||mode==='week')goalUI();if(mode==='set')accUI()}catch(e){}
@@ -852,86 +913,10 @@ function submit(){
   fx=null;
   for(const it of parse(text)){const id=Date.now().toString(36)+Math.random().toString(36).slice(2,6);if(!fx)fx=id;entries.push({id,at,task:it.task,mins:it.minutes,icon:it.icon,...(it.tags&&it.tags.length?{tags:it.tags}:{}),start:it.start||start,done:(it.done&&(it.start||start)<=key(new Date()))?key(new Date()):null})}
   const k0=key(day),before=getDay(k0),n=entries.length-before.length;
-  $('#box').value='';rs();setDay(k0,entries);load();say('Logged. Tap the mic for the next one.');
+  $('#box').value='';rs();setDay(k0,entries);load();
   toastAct('Logged '+n+(n===1?' entry.':' entries.'),'Undo',()=>{setDay(k0,before);load();toast('Undone.')});
 }
 $('#box').oninput=rs;$('#go').onclick=submit;
-
-// voice: continuous, on-device when supported
-const SR=window.SpeechRecognition||window.webkitSpeechRecognition;
-let rec=null,want=false,base='',got=false;
-const HI=!!SR&&typeof SR.install==='function'&&typeof SR.available==='function',VL=()=>navigator.language||'en-US';
-const vgN=()=>parseInt(G('dls:vg'))||0;
-let vst=HI?(vgN()>=1?'crashed':'idle'):'unsupported',vbusy=false;
-function vsUI(){
-  const T={idle:'Offline voice downloads itself the first time you open the app with internet. Tap the button below to do it now.',crashed:'Setting up offline voice was interrupted, so it paused. Tap the button below to try again. Your keyboard’s mic key still works offline.',ready:'Offline voice is installed and ready on this device.',downloading:'Downloading the offline voice pack (one time). Keep the app open until it finishes.',downloadable:'The offline voice pack isn’t installed yet. Tap the button below to download it.',checking:'Checking offline voice…',unavailable:'Offline voice isn’t available in this browser. Your keyboard’s mic key still works offline.',unsupported:'This browser doesn’t let web apps install an offline voice pack. Your keyboard’s mic key still works offline.'};
-  $('#vs').textContent=T[vst]||'';$('#vdl').hidden=!(vst==='idle'||vst==='downloadable'||vst==='crashed');
-}
-async function prepVoice(){
-  if(!HI||vbusy||vst==='ready'||vst==='crashed')return;
-  vbusy=true;S('dls:vg',String(vgN()+1));
-  const o={langs:[VL()],processLocally:true};
-  try{
-    const a=await SR.available(o);
-    if(a===true||a==='available')vst='ready';
-    else if(a==='downloadable'||a==='downloading'){
-      vst='downloading';vsUI();toast('Downloading offline voice (one time). Keep the app open.');
-      try{vst=(await SR.install(o))?'ready':'downloadable'}catch(e){vst='downloadable'}
-    }else vst='unavailable';
-  }catch(e){vst='unsupported'}
-  S('dls:vg','0');vbusy=false;vsUI();if(vst==='ready'){say('Offline voice is ready.');if(G('dls:vr')!=='1'){S('dls:vr','1');toast('Offline voice is ready on this device.')}}
-}
-$('#vdl').onclick=()=>{S('dls:vg','0');vst='checking';vsUI();prepVoice()};
-function armTap(){const f=()=>{if(vst==='downloadable'||vst==='idle')prepVoice()};addEventListener('pointerdown',f,{capture:true,once:true})}
-function autoVoice(){
-  if(!HI||!localV||vst==='crashed'||vst==='ready')return;
-  const go=()=>prepVoice().then(()=>{if(vst==='downloadable'||vst==='idle')armTap()});
-  navigator.onLine?go():addEventListener('online',go,{once:true});
-}
-let vzS=null;
-function vzStart(){
-  const v=$('#viz');v.hidden=false;
-  const AC=window.AudioContext||window.webkitAudioContext,lite=document.documentElement.classList.contains('lite');
-  if(lite||!AC||/iPad|iPhone|iPod/.test(navigator.userAgent)||!(navigator.mediaDevices&&navigator.mediaDevices.getUserMedia)){v.classList.add('idle');return}
-  navigator.mediaDevices.getUserMedia({audio:true}).then(st=>{
-    if(!want||vzS){st.getTracks().forEach(t=>t.stop());return}
-    const ctx=new AC(),an=ctx.createAnalyser();an.fftSize=64;an.smoothingTimeConstant=.6;ctx.createMediaStreamSource(st).connect(an);
-    const bars=[...v.children],buf=new Uint8Array(an.frequencyBinCount);
-    vzS={st,ctx,t:setInterval(()=>{an.getByteFrequencyData(buf);bars.forEach((b,i)=>{b.style.transform='scaleY('+Math.max(.12,Math.min(1,buf[1+i*2]/255*1.4))+')'})},80)};
-  }).catch(()=>{v.classList.add('idle')});
-}
-function vzPulse(){[...$('#viz').children].forEach(b=>{b.style.transform='scaleY('+(.25+Math.random()*.75)+')'});clearTimeout(vzPulse.t);vzPulse.t=setTimeout(()=>{[...$('#viz').children].forEach(b=>{b.style.transform=''})},260)}
-function vzStop(){const v=$('#viz');v.hidden=true;v.classList.remove('idle');[...v.children].forEach(b=>{b.style.transform=''});if(vzS){clearInterval(vzS.t);try{vzS.st.getTracks().forEach(t=>t.stop());vzS.ctx.close()}catch(e){}vzS=null}}
-const kb=m=>{$('#box').focus();say(m||'Tap the microphone key on your keyboard, speak, then tap the arrow.')};
-function startMic(){
-  const off=!navigator.onLine,P=!!SR&&'processLocally' in SR.prototype,loc=P&&(localV||off);
-  if(!SR||(!loc&&(off||!voiceOn)))return kb(off?'You’re offline. Use your keyboard’s mic key (works offline if Dictation is on).':0);
-  rec=new SR();rec.lang=navigator.language||'en-US';rec.interimResults=true;rec.continuous=true;
-  if(loc)rec.processLocally=true;
-  base=$('#box').value.trim();got=false;want=true;
-  rec.onstart=()=>{$('#mic').classList.add('on');$('#mic').setAttribute('aria-label','Stop listening');say('Listening… tap again when you’re done.');vzStart()};
-  rec.onresult=e=>{if(!vzS)vzPulse();let t='';for(const r of e.results)t+=r[0].transcript+' ';got=true;$('#box').value=(base?base+' ':'')+t.trim();rs()};
-  rec.onerror=e=>{
-    const f=['not-allowed','service-not-allowed','language-not-supported'].includes(e.error);if(f)want=false;
-    if(e.error==='no-speech'||e.error==='aborted')return;
-    if(e.error==='language-not-supported'&&HI&&vst!=='unavailable'){vst='checking';vsUI();prepVoice();say('Getting the offline voice pack… try again in a moment.');return}
-    say(e.error==='language-not-supported'?'On-device speech isn’t installed for your language. Use your keyboard’s mic key.':f?'Mic is blocked. Use your keyboard’s mic in the box instead.':'Voice problem: '+e.error);
-  };
-  rec.onend=()=>{
-    if(want){base=$('#box').value.trim();try{rec.start();return}catch(x){want=false}}
-    $('#mic').classList.remove('on');$('#mic').setAttribute('aria-label','Start talking');vzStop();if(got)submit();
-  };
-  try{rec.start()}catch(e){want=false;say('Couldn’t start the mic.')}
-}
-$('#mic').onclick=()=>{
-  if(want){want=false;rec.stop();return}
-  if(HI&&vst==='downloading'){say('Offline voice is still downloading. Keep the app open, or use your keyboard’s mic key for now.');return}
-  if(HI&&vst==='idle'){
-    say('Setting up offline voice…');const t0=Date.now();
-    prepVoice().then(()=>{if(vst==='ready'){Date.now()-t0<2000?startMic():say('Offline voice is ready. Tap the mic to start.')}else if(vst!=='downloading')startMic()});return;
-  }
-  startMic();
-};
 
 // export
 let tt;function toast(m,ms){const t=$('#toast');t.textContent=m;t.classList.remove('act');t.classList.add('on');clearTimeout(tt);tt=setTimeout(()=>t.classList.remove('on'),ms||2800)}
@@ -1081,7 +1066,7 @@ function syncAp(){
   document.querySelectorAll('#md button').forEach(b=>b.classList.toggle('on',b.dataset.m===m));
   document.querySelectorAll('#sw [data-ac]').forEach(b=>b.classList.toggle('on',b.dataset.ac===ac));
   document.querySelectorAll('#ts button').forEach(b=>b.classList.toggle('on',b.dataset.t===(G('dls:ts')||'')));
-  $('#pc').hidden=!has;$('#bgth').hidden=!has;$('#pick span').textContent=has?'Change photo':'Choose a photo';
+  $('#pc').hidden=!has;$('#bgth').hidden=!has;$('#pick span').textContent=has?'Change wallpaper':'Choose wallpaper';
   if(has){
     const o=Math.round((parseFloat(G('dls:bgo'))||1)*100),dv=parseFloat(G('dls:bgd')),dm=Math.round((isFinite(dv)?dv:.25)*100);
     $('#bgt').checked=G('dls:bgon')==='1';$('#sO').value=o;$('#sD').value=dm;$('#oO').textContent=o+'%';$('#oD').textContent=dm+'%';
@@ -1091,8 +1076,7 @@ function syncAp(){
 }
 function accUI(){
   const set=(id,t)=>{const e=$('#'+id);if(e)e.textContent=t},g=parseFloat(G('dls:goal'))||0,lb=+G('dls:lb')||0,nmv=(G('dls:nm')||'').trim();
-  set('as-ap',{auto:'Auto',light:'Light',dark:'Dark'}[modeNow()]+' · '+({custom:'Random',photo:'From photo'}[accNow()]||ACCN[accNow()])+(G('dls:bgon')==='1'&&G('dls:bg')&&accNow()!=='photo'?' · photo':''));
-  set('as-go',g>0?g+(g===1?' hour':' hours')+' a week':'Off');set('as-vo',localV?'On this device':'Online allowed');
+  set('as-ap',{auto:'Auto',light:'Light',dark:'Dark'}[modeNow()]+' · '+({brown:'Brown',blue:'Blue',purple:'Purple',pink:'Pink',graphite:'Graphite'}[G('dls:ac')]||'Green')+(G('dls:bgon')==='1'&&G('dls:bg')?' · Wallpaper':''));set('as-go',g>0?g+(g===1?' hour':' hours')+' a week':'Off');set('as-vo',localV?'On this device':'Online allowed');
   set('as-pv',pinInfo()?'PIN is on':'No PIN');set('as-bk',lb?'Last backup '+new Date(lb).toLocaleDateString(undefined,{day:'numeric',month:'short'}):'Not backed up yet');
   set('as-ab',nmv||'Add your name');set('as-hp','Tips and what’s new');set('as-pf',(G('dls:ws')==='sun'?'Sunday':'Monday')+' start · '+({'12':'12-hour','24':'24-hour'}[G('dls:h')]||'Phone time'));try{sndUI()}catch(e){}
 }
@@ -1367,7 +1351,7 @@ let rpc=null;
 $('#rpt').onclick=()=>{rpc=drawReport();$('#rpi').src=rpc.toDataURL('image/png');$('#rp').showModal()};
 $('#rpx').onclick=()=>$('#rp').close();
 $('#rps').onclick=()=>{if(rpc)rpc.toBlob(b=>{if(b)save('tracker-week-'+key(wkStart(day))+'.png',b)},'image/png')};
-const fr=()=>{if(!READY)return setTimeout(fr,300);if(document.documentElement.classList.contains('locked'))return;if(!allEntries().length&&G('dls:tu')!=='1'){S('dls:wl','2');startTour()}else if(G('dls:wl')!=='2'){S('dls:wl','2');wlShow()}};setTimeout(fr,800);
+const fr=()=>{if(!READY)return setTimeout(fr,300);if(document.documentElement.classList.contains('locked'))return;if(!allEntries().length&&G('dls:tu')!=='1'){S('dls:wl','2');startTour()}else if(G('dls:wl')!=='2'){S('dls:wl','2');wlShow()}};
 $('#nm').value=G('dls:nm')||'';$('#nm').oninput=()=>{S('dls:nm',$('#nm').value.trim());render()};
 $('#sa').onclick=()=>nav(()=>{mode='list';render(true);scrollTo(0,0)},'f');
 try{matchMedia('(prefers-color-scheme: dark)').addEventListener('change',()=>{if(!G('dls:m')){applyTheme();render()}})}catch(e){}
@@ -1384,7 +1368,7 @@ function upBanner(w){if($('#upb'))return;const b=document.createElement('div'),t
 (function(){
   const C=document.querySelector('[data-s=set]'),bk=document.createElement('button'),nd=document.createElement('div');
   bk.id='sbk';bk.type='button';bk.hidden=true;bk.textContent='‹ Settings';nd.id='snd';nd.hidden=true;C.prepend(bk,nd);
-  [['Personalise','ap pf ab','g1'],['Tracking','go vo','g2'],['Data and privacy','bk pv','g3'],['Help','hp','g4']].forEach(([t,ks,c])=>{
+  [['Personalise','ap pf ab','g1'],['Tracking','go','g2'],['Data and privacy','bk pv','g3'],['Help','hp','g4']].forEach(([t,ks,c])=>{
     const h=document.createElement('h2'),g=document.createElement('div');h.textContent=t;g.className='card sgrp '+c;ks.split(' ').forEach(k=>g.append(C.querySelector('[data-acc='+k+']')));C.append(h,g)});
   const ft=document.createElement('p'),fv=document.createElement('span'),fb=document.createElement('button');ft.id='sft';ft.className='lbl';fb.type='button';fb.className='mini';fb.textContent='Replay the tutorial';fb.onclick=()=>$('#tur').click();
   fv.textContent='Your entries stay on this phone.';ft.append(fv,document.createElement('br'),fb);C.append(ft);
@@ -1404,13 +1388,13 @@ function sndUI(){
   if(pin)add('Add a PIN','Keep your entries private.','Set PIN',()=>pinDlg('set'),()=>{S('dls:pnd','1');sndUI()});
 }
 {const sm=HTMLDialogElement.prototype.showModal;HTMLDialogElement.prototype.showModal=function(){const f=document.activeElement;this.addEventListener('close',()=>{try{if(f&&f.isConnected&&!document.documentElement.classList.contains('locked'))f.focus()}catch(e){}},{once:true});return sm.apply(this,arguments)}}
-$('#lke').setAttribute('aria-live','polite');
+$('#lke').setAttribute('aria-live','polite');$('#xp2').onclick=()=>$('#xp').showModal();(function(){const K=['green','brown','blue','purple','pink','graphite'],u=()=>{let a=G('dls:ac');if(K.indexOf(a)<0)a='green';document.querySelectorAll('#sws button').forEach(b=>{const o=b.dataset.k===a;b.classList.toggle('on',o);b.setAttribute('aria-pressed',o)})};document.querySelectorAll('#sws button').forEach(b=>b.onclick=()=>{S('dls:ac',b.dataset.k);themeGo();u();accUI()});u()})();
 dbBoot();
-setTimeout(()=>{const a=new URLSearchParams(location.search).get('a');if(!a||document.documentElement.classList.contains('locked'))return;try{if(a==='voice')$('#mic').click();else if(a==='timer'){const n=$('#tmn');n.scrollIntoView({block:'center'});n.focus()}}catch(e){}},1200);
-$('#off').textContent='Offline mode isn’t active yet. Open the app once with internet.';
+setTimeout(()=>{const a=new URLSearchParams(location.search).get('a');if(!a||document.documentElement.classList.contains('locked'))return;try{if(a==='timer'){const n=$('#tmn');n.scrollIntoView({block:'center'});n.focus()}}catch(e){}},1200);
+
 try{if(navigator.storage&&navigator.storage.persist)navigator.storage.persist()}catch(e){}
-vsUI();setTimeout(()=>{try{autoVoice()}catch(e){}},1500);
-try{if('serviceWorker' in navigator){const had=!!navigator.serviceWorker.controller;navigator.serviceWorker.register('sw.js').then(r=>{if(r.waiting&&had)upBanner(r.waiting);r.addEventListener('updatefound',()=>{const n=r.installing;n&&n.addEventListener('statechange',()=>{if(n.state==='installed'&&navigator.serviceWorker.controller)upBanner(n)})});setInterval(()=>r.update().catch(()=>{}),36e5)}).catch(()=>{});let rl=0;navigator.serviceWorker.addEventListener('controllerchange',()=>{if(!had||rl)return;rl=1;location.reload()});navigator.serviceWorker.ready.then(()=>{$('#off').textContent='App works offline. Voice offline needs a browser with on-device speech; otherwise use your keyboard’s mic key.'})}}catch(e){}
+
+try{if('serviceWorker' in navigator){const had=!!navigator.serviceWorker.controller;navigator.serviceWorker.register('sw.js').then(r=>{if(r.waiting&&had)upBanner(r.waiting);r.addEventListener('updatefound',()=>{const n=r.installing;n&&n.addEventListener('statechange',()=>{if(n.state==='installed'&&navigator.serviceWorker.controller)upBanner(n)})});setInterval(()=>r.update().catch(()=>{}),36e5)}).catch(()=>{});let rl=0;navigator.serviceWorker.addEventListener('controllerchange',()=>{if(!had||rl)return;rl=1;location.reload()});navigator.serviceWorker.ready.then(()=>{0})}}catch(e){}
 
 (function(){const o=$('#offs'),f=async()=>{let t;try{if(!('caches' in window)||!('serviceWorker' in navigator))t='This browser can’t keep the app for offline use.';else t=(await caches.match('index.html'))?'Ready for offline use. The app opens with no data or signal.':'Not saved for offline use yet. Open the app once with internet and keep it open for a few seconds.'}catch(e){t='Couldn’t check offline status.'}o.textContent=t};f();try{navigator.serviceWorker.ready.then(f)}catch(e){}addEventListener('online',f)})();
 </script>
